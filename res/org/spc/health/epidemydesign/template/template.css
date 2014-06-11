@@ -1,0 +1,29 @@
+.infection {    
+    -fx-background-color: black, linear-gradient(to bottom, white 0%, lightgray 100%);
+    -fx-background-insets: 0px, 2px;
+    -fx-background-radius: 15px 0px 0px 15px, 14px 0px 0px 14px;
+    -fx-pref-width: 120px;   
+    -fx-pref-height: 30px;   
+}
+.infection .label {    
+    -fx-graphic-text-gap: 2px;
+    -fx-font-family: calibri;
+    -fx-font-weight: bold;
+    -fx-font-size: 1.5em;
+}
+.infection > * >  .marker {
+    -base-color: green;
+    -fx-background-color: linear-gradient(to bottom, -base-color 0%, derive(-base-color, -50%) 100%);
+    -fx-background-radius: 10;
+    -fx-pref-width: 20;   
+    -fx-pref-height: 20;   
+}
+.marker:increasing {
+    -base-color: red;
+}
+.marker:decreasing {
+    -base-color: blue;
+}
+.marker:unknown {
+    -base-color: gray;
+}
