@@ -5,16 +5,14 @@
  ***********************************************************************/
 package org.spc.health.epidemydesign;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -37,6 +35,9 @@ public final class EpidemyDesign extends Application {
         final URL cssURL = getClass().getResource("EpidemyDesign.css"); // NOI18N.
         scene.getStylesheets().add(cssURL.toExternalForm());
         primaryStage.setTitle("Epidemy Design"); // NOI18N.
+        final URL iconURL = getClass().getResource("AppIcon.png"); // NOI18N.
+        final Image icon = new Image(iconURL.toExternalForm());
+        primaryStage.getIcons().add(icon);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
