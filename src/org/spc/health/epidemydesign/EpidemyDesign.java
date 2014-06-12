@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -21,6 +24,8 @@ import javafx.stage.Stage;
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public final class EpidemyDesign extends Application {
+
+    private Stage stage;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -36,10 +41,24 @@ public final class EpidemyDesign extends Application {
         primaryStage.setTitle("Epidemy Design"); // NOI18N.
         final URL iconURL = getClass().getResource("AppIcon.png"); // NOI18N.
         final Image icon = new Image(iconURL.toExternalForm());
-        primaryStage.getIcons().add(icon);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage = primaryStage;
+        stage.getIcons().add(icon);
+        stage.setScene(scene);
+        stage.show();
+        stage.xProperty().addListener(stagePropertiesInvalidationListener);
+        stage.yProperty().addListener(stagePropertiesInvalidationListener);
+        stage.widthProperty().addListener(stagePropertiesInvalidationListener);
+        stage.heightProperty().addListener(stagePropertiesInvalidationListener);
     }
+
+    private final InvalidationListener stagePropertiesInvalidationListener = (Observable observable) -> {
+        Platform.runLater(() -> {
+            Settings.getPrefs().putDouble("stage.x", stage.getX());
+            Settings.getPrefs().putDouble("stage.y", stage.getY());
+            Settings.getPrefs().putDouble("stage.width", stage.getWidth());
+            Settings.getPrefs().putDouble("stage.height", stage.getHeight());
+        });
+    };
 
     /**
      * @param args the command line arguments
