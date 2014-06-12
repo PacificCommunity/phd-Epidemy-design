@@ -50,4 +50,31 @@
     nbproject/build-impl.xml and nbproject/jfx-impl.xml.
 
     -->
+    <!-- FB : Support for build versionning - start -->
+    <target name="-post-compile">
+        <propertyfile file="${src.dir}/org/spc/health/epidemydesign/version.properties"  comment="Build Number for ANT. Do not edit!">
+            <!-- This will initialize the entire file content if needed. -->
+            <entry key="version.major" type="int"  default="0" />
+            <entry key="version.minor" type="int" default="0" />
+            <entry key="version.release" type="int" default="1" />
+            <entry key="version.codename" type="string" default="" />
+            <entry key="version.date" type="date" default="${timestamp}"/>
+            <!-- Update relevant values -and initialize them if needed. -->
+            <entry key="build.number" type="int" operation="+" default="1" />
+            <entry key="build.date" type="date" operation="=" value="${timestamp}" default="${timestamp}"/>
+        </propertyfile>
+        <!-- Recopy modified file in the binaries folder. -->
+        <copy  file="${src.dir}/org/spc/health/epidemydesign/version.properties" todir="${build.dir}/compiled/org/spc/health/epidemydesign"/>
+    </target>
+    <target name="-pre-jar">
+        <propertyfile file="${src.dir}/org/spc/health/epidemydesign/version.properties"  comment="Build Number for ANT. Do not edit!">
+            <!-- Update relevant values -and initialize them if needed. -->
+            <entry key="version.release" type="int" operation="+" default="0"/>
+            <entry key="version.date" type="date" operation="=" value="${timestamp}" default="${timestamp}"/>
+        </propertyfile>
+        <!-- Recopy modified file in the binaries folder. -->
+        <copy  file="${src.dir}/org/spc/health/epidemydesign/version.properties" todir="${build.dir}/compiled/org/spc/health/epidemydesign"/>
+    </target>
+    <!-- FB : Support for build versionning - end -->
+    
 </project>
