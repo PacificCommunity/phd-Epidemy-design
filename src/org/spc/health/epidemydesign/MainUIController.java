@@ -161,9 +161,15 @@ public final class MainUIController extends ControllerBase implements Initializa
             // Try to load the node to see if it works or not.
             final URL fxmlURL = fxmlFile.toURI().toURL();
             final URL cssURL = cssFile.toURI().toURL();
+            final File tempCSSFile = File.createTempFile(cssFile.getName(), null);
+            try (final FileOutputStream tempCSSOutput = new FileOutputStream(tempCSSFile)) {
+                Files.copy(cssFile.toPath(), tempCSSOutput);
+            }
+            final URL tempCSSURL = tempCSSFile.toURI().toURL();
             final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL);
             final Region node = fxmlLoader.load();
-            node.getStylesheets().add(cssURL.toExternalForm());
+//            node.getStylesheets().add(cssURL.toExternalForm());
+            node.getStylesheets().add(tempCSSURL.toExternalForm());
             // Remove old previews.
             previewPane.getChildren().clear();
             // Load new previews.
@@ -172,11 +178,6 @@ public final class MainUIController extends ControllerBase implements Initializa
                     final FXMLLoader fxmlLoader1 = new FXMLLoader(fxmlURL);
                     final Region node1 = fxmlLoader1.load();
 //                    node1.getStylesheets().add(cssURL.toExternalForm());
-                    final File tempCSSFile = File.createTempFile(cssFile.getName(), null);
-                    try (final FileOutputStream tempCSSOutput = new FileOutputStream(tempCSSFile)) {
-                        Files.copy(cssFile.toPath(), tempCSSOutput);
-                    }
-                    URL tempCSSURL = tempCSSFile.toURI().toURL();
                     node1.getStylesheets().add(tempCSSURL.toExternalForm());
                     final PseudoClass pseudoClass = PseudoClass.getPseudoClass(state.name);
                     node1.pseudoClassStateChanged(pseudoClass, true);
