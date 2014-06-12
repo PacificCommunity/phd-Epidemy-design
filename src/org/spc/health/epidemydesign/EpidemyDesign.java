@@ -24,9 +24,8 @@ public final class EpidemyDesign extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        final ResourceBundle bundle = ResourceBundle.getBundle("org.spc.health.epidemydesign.strings"); // NOI18N.
         final URL fxmlURL = getClass().getResource("MainUI.fxml"); // NOI18N.
-        final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL, bundle);
+        final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL, I18N.getResourceBundle());
         final Node mainUI = fxmlLoader.load();
         final MainUIController mainUIController = fxmlLoader.getController();
         mainUIController.setApplication(this);
