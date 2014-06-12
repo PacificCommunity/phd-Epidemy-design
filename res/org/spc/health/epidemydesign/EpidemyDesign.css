@@ -8,6 +8,9 @@
     -fx-spacing: 2px;
     -fx-padding: 2px;
 }
+.action-bar > * > .tooltip {
+    -fx-font-size: 1.0em;
+}
 .editor {
     -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
     -fx-background-radius: 0px, 0px;
