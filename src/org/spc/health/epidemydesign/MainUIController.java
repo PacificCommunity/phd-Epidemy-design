@@ -7,6 +7,7 @@ package org.spc.health.epidemydesign;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -125,9 +128,11 @@ public final class MainUIController extends ControllerBase implements Initializa
         });
         populateStatesColumns();
         //
-        cssArea.setOnKeyReleased((final KeyEvent keyEvent) -> requestSaveAndReload());
-        fxmlArea.setOnKeyReleased((final KeyEvent keyEvent) -> requestSaveAndReload());
+        cssArea.textProperty().addListener(textInvalitationListener);
+        fxmlArea.textProperty().addListener(textInvalitationListener);
     }
+
+    private final InvalidationListener textInvalitationListener = (Observable observable) -> requestSaveAndReload();
 
     private void populateStatesColumns() {
         states.forEach((final State state) -> {
@@ -166,7 +171,13 @@ public final class MainUIController extends ControllerBase implements Initializa
                 try {
                     final FXMLLoader fxmlLoader1 = new FXMLLoader(fxmlURL);
                     final Region node1 = fxmlLoader1.load();
-                    node1.getStylesheets().add(cssURL.toExternalForm());
+//                    node1.getStylesheets().add(cssURL.toExternalForm());
+                    final File tempCSSFile = File.createTempFile(cssFile.getName(), null);
+                    try (final FileOutputStream tempCSSOutput = new FileOutputStream(tempCSSFile)) {
+                        Files.copy(cssFile.toPath(), tempCSSOutput);
+                    }
+                    URL tempCSSURL = tempCSSFile.toURI().toURL();
+                    node1.getStylesheets().add(tempCSSURL.toExternalForm());
                     final PseudoClass pseudoClass = PseudoClass.getPseudoClass(state.name);
                     node1.pseudoClassStateChanged(pseudoClass, true);
                     final Group group = new Group(node1);
@@ -351,8 +362,8 @@ public final class MainUIController extends ControllerBase implements Initializa
                 saveAndReload();
             });
             waitTimer = Optional.of(pauseTransition);
-            waitTimer.ifPresent((PauseTransition p) -> p.playFromStart());
         }
+        waitTimer.ifPresent((PauseTransition p) -> p.playFromStart());
     }
 
     private void saveAndReload() {
