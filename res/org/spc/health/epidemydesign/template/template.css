@@ -1,7 +1,7 @@
 .infection {    
-    -fx-background-color: black, linear-gradient(to bottom, white 0%, lightgray 100%);
-    -fx-background-insets: 0px, 2px;
-    -fx-background-radius: 15px 0px 0px 15px, 14px 0px 0px 14px;
+    -fx-background-color: black, white, linear-gradient(to bottom, white 0%, lightgray 100%);
+    -fx-background-insets: 0px, 2px, 3px;
+    -fx-background-radius: 15px 0px 0px 15px, 13px 0px 0px 13px, 12px 0px 0px 12px;
     -fx-pref-width: 120px;   
     -fx-pref-height: 30px;   
 }
@@ -9,21 +9,23 @@
     -fx-graphic-text-gap: 2px;
     -fx-font-family: calibri;
     -fx-font-weight: bold;
-    -fx-font-size: 1.5em;
+    -fx-font-size: 1.8em;
+    -fx-text-fill: linear-gradient(to bottom, black 0%, derive(black, 50%) 100%); 
 }
 .infection > * >  .marker {
     -base-color: green;
-    -fx-background-color: linear-gradient(to bottom, -base-color 0%, derive(-base-color, -50%) 100%);
-    -fx-background-radius: 10;
+    -fx-background-color: derive(-base-color, -50%), derive(-base-color, 50%), linear-gradient(to bottom, derive(-base-color, -50%) 0%, derive(-base-color, 20%) 100%);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 10, 9, 8;
     -fx-pref-width: 20;   
     -fx-pref-height: 20;   
 }
-.marker:increasing {
+.infection:increasing > * > .marker {
     -base-color: red;
 }
-.marker:decreasing {
-    -base-color: blue;
+.infection:decreasing > * > .marker {
+    -base-color: royalblue;
 }
-.marker:unknown {
+.infection:unknown > * > .marker {
     -base-color: gray;
 }

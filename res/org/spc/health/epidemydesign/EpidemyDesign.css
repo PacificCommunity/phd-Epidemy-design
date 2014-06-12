@@ -1,0 +1,29 @@
+/***********************************************************************
+ *  Copyright - Secretariat of the Pacific Community                   *
+ *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
+ *  http://www.spc.int/                                                *
+ ***********************************************************************/
+.action-bar {
+    -fx-font-size: 0.8em;
+    -fx-spacing: 2px;
+    -fx-padding: 2px;
+}
+.editor {
+    -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
+    -fx-background-radius: 0px, 0px;
+    -fx-background-insets: 0px, 1px 0px 0px 0px;
+    -fx-font-family: monospace;
+    -fx-font-size: 0.9em;
+}
+.editor .content {
+    -fx-background-color: white;
+}
+.preview-pane {
+    -fx-background-image: url("transparency.png");
+}
+.title {
+    -fx-font-size: 1.5em;
+    -fx-font-weight: bold;
+    -fx-text-fill: gray;
+    -fx-opacity: 0.5;
+}

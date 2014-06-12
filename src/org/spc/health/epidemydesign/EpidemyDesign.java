@@ -1,43 +1,42 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
+/***********************************************************************
+ *  Copyright - Secretariat of the Pacific Community                   *
+ *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
+ *  http://www.spc.int/                                                *
+ ***********************************************************************/
 package org.spc.health.epidemydesign;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.ResourceBundle;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 /**
- *
- * @author fabriceb
+ * The app class.
+ * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-public class EpidemyDesign extends Application {
-    
+public final class EpidemyDesign extends Application {
+
     @Override
-    public void start(Stage primaryStage) {
-        Button btn = new Button();
-        btn.setText("Say 'Hello World'");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-            
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Hello World!");
-            }
-        });
-        
-        StackPane root = new StackPane();
-        root.getChildren().add(btn);
-        
-        Scene scene = new Scene(root, 300, 250);
-        
-        primaryStage.setTitle("Hello World!");
+    public void start(Stage primaryStage) throws IOException {
+        final ResourceBundle bundle = ResourceBundle.getBundle("org.spc.health.epidemydesign.strings"); // NOI18N.
+        final URL fxmlURL = getClass().getResource("MainUI.fxml"); // NOI18N.
+        final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL, bundle);
+        final Node mainUI = fxmlLoader.load();
+        final MainUIController mainUIController = fxmlLoader.getController();
+        mainUIController.setApplication(this);
+        final StackPane root = new StackPane(mainUI);
+        final Scene scene = new Scene(root, 900, 700);
+        final URL cssURL = getClass().getResource("EpidemyDesign.css"); // NOI18N.
+        scene.getStylesheets().add(cssURL.toExternalForm());
+        primaryStage.setTitle("Epidemy Design"); // NOI18N.
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -48,5 +47,5 @@ public class EpidemyDesign extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }

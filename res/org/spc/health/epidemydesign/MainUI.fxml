@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Copyright - Secretariat of the Pacific Community
+Droit de copie - Secrétariat Général de la Communauté du Pacifique
+http://www.spc.int/
+-->
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane id="BorderPane" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.MainUIController">
+   <center>
+      <SplitPane dividerPositions="0.66" layoutX="-7.0" layoutY="49.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+            <SplitPane dividerPositions="0.66" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+              <items>
+                  <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0">
+                     <items>
+                        <VBox fx:id="cssContent" prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" styleClass="action-bar">
+                                 <children>
+                                    <Label styleClass="title" text="%CSS_LABEL" />
+                                    <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%CSS_REFERENCE_GUIDE_LABEL" />
+                                    <Region fx:id="cssBarSpacer" HBox.hgrow="ALWAYS" />
+                                    <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%RESET_TO_DEFAULT_LABEL" />
+                                 </children>
+                              </HBox>
+                              <TextArea fx:id="cssArea" prefHeight="200.0" prefWidth="200.0" styleClass="editor" wrapText="true" VBox.vgrow="ALWAYS" />
+                           </children>
+                        </VBox>
+                        <VBox fx:id="fxmlContent" prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" styleClass="action-bar">
+                                 <children>
+                                    <Label styleClass="title" text="%FXML_LABEL" />
+                                    <Region fx:id="fxmlBarSpacer" HBox.hgrow="ALWAYS" />
+                                    <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%RESET_TO_DEFAULT_LABEL" />
+                                 </children>
+                              </HBox>
+                              <TextArea fx:id="fxmlArea" prefHeight="200.0" prefWidth="200.0" styleClass="editor" wrapText="true" VBox.vgrow="ALWAYS" />
+                           </children>
+                        </VBox>
+                     </items>
+                  </SplitPane>
+                  <TableView fx:id="infectionTable">
+                    <columns>
+                      <TableColumn fx:id="infectionColumn" prefWidth="75.0" text="%VALUE_LABEL" />
+                    </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                  </TableView>
+              </items>
+            </SplitPane>
+            <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" />
+        </items>
+      </SplitPane>
+   </center>
+</BorderPane>
