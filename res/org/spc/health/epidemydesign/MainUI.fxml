@@ -12,7 +12,7 @@ http://www.spc.int/
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane id="BorderPane" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.MainUIController">
+<BorderPane id="BorderPane" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.MainUIController">
    <center>
       <SplitPane dividerPositions="0.66" layoutX="-7.0" layoutY="49.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -27,7 +27,17 @@ http://www.spc.int/
                                     <Label styleClass="title" text="%CSS_LABEL" />
                                     <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%CSS_REFERENCE_GUIDE_LABEL" />
                                     <Region fx:id="cssBarSpacer" HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%RESET_TO_DEFAULT_LABEL" />
+                                    <Button fx:id="saveCSSButton" mnemonicParsing="false" text="%SAVE_LABEL" />
+                                    <SplitMenuButton fx:id="loadCSSButton" mnemonicParsing="false" text="%LOAD_LABEL">
+                                      <items>
+                                        <MenuItem mnemonicParsing="false" text="Action 1" />
+                                        <MenuItem mnemonicParsing="false" text="Action 2" />
+                                      </items>
+                                    </SplitMenuButton>
+                                    <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                                       <tooltip>
+                                          <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                                       </tooltip></Button>
                                  </children>
                               </HBox>
                               <TextArea fx:id="cssArea" prefHeight="200.0" prefWidth="200.0" styleClass="editor" wrapText="true" VBox.vgrow="ALWAYS" />
@@ -39,7 +49,17 @@ http://www.spc.int/
                                  <children>
                                     <Label styleClass="title" text="%FXML_LABEL" />
                                     <Region fx:id="fxmlBarSpacer" HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%RESET_TO_DEFAULT_LABEL" />
+                                    <Button fx:id="saveFXMLButton" mnemonicParsing="false" text="%SAVE_LABEL" />
+                                    <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" text="%LOAD_LABEL">
+                                      <items>
+                                        <MenuItem mnemonicParsing="false" text="Action 1" />
+                                        <MenuItem mnemonicParsing="false" text="Action 2" />
+                                      </items>
+                                    </SplitMenuButton>
+                                    <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                                       <tooltip>
+                                          <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                                       </tooltip></Button>
                                  </children>
                               </HBox>
                               <TextArea fx:id="fxmlArea" prefHeight="200.0" prefWidth="200.0" styleClass="editor" wrapText="true" VBox.vgrow="ALWAYS" />
@@ -47,17 +67,51 @@ http://www.spc.int/
                         </VBox>
                      </items>
                   </SplitPane>
-                  <TableView fx:id="infectionTable">
-                    <columns>
-                      <TableColumn fx:id="infectionColumn" prefWidth="75.0" text="%VALUE_LABEL" />
-                    </columns>
-                     <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                     </columnResizePolicy>
-                  </TableView>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <HBox prefHeight="100.0" prefWidth="200.0" styleClass="action-bar">
+                           <children>
+                              <Label styleClass="title" text="%INFECTIONS_LABEL" />
+                              <TextField />
+                              <Button mnemonicParsing="false" text="%ADD_LABEL" />
+                              <Region fx:id="infectionSpacer" HBox.hgrow="ALWAYS" />
+                              <Button mnemonicParsing="false" text="%RESET_TO_DEFAULT_LABEL">
+                                 <tooltip>
+                                    <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                                 </tooltip>
+                              </Button>
+                           </children>
+                        </HBox>
+                        <TableView fx:id="infectionTable">
+                          <columns>
+                            <TableColumn fx:id="infectionColumn" prefWidth="75.0" text="%VALUE_LABEL" />
+                          </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </children>
+                  </VBox>
               </items>
             </SplitPane>
-            <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" />
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <HBox styleClass="action-bar">
+                     <children>
+                        <Label styleClass="title" text="%PREVIEW_LABEL" />
+                        <ComboBox fx:id="previewCombo" prefWidth="150.0" />
+                        <Region fx:id="previewSpacer" HBox.hgrow="ALWAYS" />
+                        <Button mnemonicParsing="false" text="%REFRESH_LABEL" />
+                        <Button mnemonicParsing="false" onAction="#handlePreviewDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                           <tooltip>
+                              <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                           </tooltip>
+                        </Button>
+                     </children>
+                  </HBox>
+                  <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
         </items>
       </SplitPane>
    </center>
