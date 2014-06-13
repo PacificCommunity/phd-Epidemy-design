@@ -17,14 +17,20 @@ import javafx.collections.ObservableList;
 public final class Infection {
 
     private final String name;
+    private final String fileName;
     private final ObservableList<State> states = FXCollections.observableList(new LinkedList<>());
 
-    public Infection(final String name) {
+    public Infection(final String name, final String fileName) {
         this.name = name;
+        this.fileName = fileName;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getFileName() {
+        return (fileName == null || fileName.isEmpty()) ? name.replaceAll("\\?", "U").replaceAll("\\s", "") : fileName; // NOI18N.
     }
 
     public ObservableList<State> getStates() {

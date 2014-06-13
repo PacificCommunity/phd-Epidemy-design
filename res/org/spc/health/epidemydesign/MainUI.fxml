@@ -69,7 +69,7 @@ http://www.spc.int/
                   </SplitPane>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                      <children>
-                        <HBox prefHeight="100.0" prefWidth="200.0" styleClass="action-bar">
+                        <HBox styleClass="action-bar" VBox.vgrow="NEVER">
                            <children>
                               <Label styleClass="title" text="%INFECTIONS_LABEL" />
                               <TextField />
@@ -82,9 +82,10 @@ http://www.spc.int/
                               </Button>
                            </children>
                         </HBox>
-                        <TableView fx:id="infectionTable">
+                        <TableView fx:id="infectionTable" VBox.vgrow="ALWAYS">
                           <columns>
-                            <TableColumn fx:id="infectionColumn" prefWidth="75.0" text="%VALUE_LABEL" />
+                            <TableColumn fx:id="infectionNameColumn" prefWidth="75.0" text="%ID_LABEL" />
+                            <TableColumn fx:id="infectionFileColumn" prefWidth="75.0" text="%FILE_PREFIX_LABEL" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -96,7 +97,7 @@ http://www.spc.int/
             </SplitPane>
             <VBox prefHeight="200.0" prefWidth="100.0">
                <children>
-                  <HBox styleClass="action-bar">
+                  <HBox styleClass="action-bar" VBox.vgrow="NEVER">
                      <children>
                         <Label styleClass="title" text="%PREVIEW_LABEL" />
                         <ComboBox fx:id="previewCombo" prefWidth="150.0" />
@@ -110,7 +111,7 @@ http://www.spc.int/
                      </children>
                   </HBox>
                   <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" VBox.vgrow="ALWAYS" />
-                  <GridPane styleClass="grid-pane">
+                  <GridPane styleClass="grid-pane" VBox.vgrow="NEVER">
                     <columnConstraints>
                       <ColumnConstraints hgrow="NEVER" />
                       <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />

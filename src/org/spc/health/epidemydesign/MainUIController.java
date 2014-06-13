@@ -73,7 +73,9 @@ public final class MainUIController extends ControllerBase implements Initializa
     @FXML
     private TableView<Infection> infectionTable;
     @FXML
-    private TableColumn<Infection, String> infectionColumn;
+    private TableColumn<Infection, String> infectionNameColumn;
+    @FXML
+    private TableColumn<Infection, String> infectionFileColumn;
     @FXML
     private TextArea cssArea;
     @FXML
@@ -139,10 +141,15 @@ public final class MainUIController extends ControllerBase implements Initializa
         //
         infectionTable.setEditable(true);
         infectionTable.setItems(infections);
-        infectionColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, String> p) -> {
+        infectionNameColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, String> p) -> {
             final Infection infection = p.getValue();
             final String name = infection.getName();
             return new SimpleStringProperty(name);
+        });
+        infectionFileColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, String> p) -> {
+            final Infection infection = p.getValue();
+            final String fileName = infection.getFileName();
+            return new SimpleStringProperty(fileName);
         });
         populateStatesColumns();
         //
@@ -180,7 +187,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             final String path = targetComboBox.getEditor().getText();
             final File file = new File(path);
             if (file.exists() && file.isDirectory()) {
-                Settings.getPrefs().put("last.output.folder", path);
+                Settings.getPrefs().put("last.output.folder", path); // NOI18N.
             }
         });
     };
@@ -443,9 +450,12 @@ public final class MainUIController extends ControllerBase implements Initializa
         final List<String> values = new ArrayList<>(fileContent.stringPropertyNames());
         Collections.sort(values);
         values.forEach((final String value) -> {
-            final String name = value.replaceAll("_", " ");
-            final Infection infection = new Infection(name);
-            final String statesLine = fileContent.getProperty(value);
+            final String name = value.replaceAll("_", " "); // NOI18N.
+            final String line = fileContent.getProperty(value);
+            final String[] lineTokens = line.split("\\|"); // NOI18N.
+            final String fileName = lineTokens.length == 1 ? null : lineTokens[0];
+            final Infection infection = new Infection(name, fileName);
+            final String statesLine = lineTokens.length == 1 ? lineTokens[0] : lineTokens[1];
             final String[] tokens = statesLine.split("\\s+"); // NOI18N.
             for (final String token : tokens) {
                 final FilteredList<State> filteredStates = states.filtered((state) -> token.equals(state.getName()));

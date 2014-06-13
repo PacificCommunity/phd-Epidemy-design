@@ -35,7 +35,7 @@ public class GenerationTask extends Task<Void> {
     private final List<Infection> infections;
     private final File fxmlFile;
     private final File cssFile;
-    private String format = "png";
+    private String format = "png"; // NOI18N.
 
     /**
      * Creates a new instance.
@@ -56,21 +56,24 @@ public class GenerationTask extends Task<Void> {
     protected synchronized Void call() throws Exception {
         int exportNumber = 0;
         exportNumber = infections.stream().map((infection) -> infection.getStates().size()).reduce(exportNumber, Integer::sum);
-        int totalProgress = 2 + 3 * exportNumber;
+        int totalProgress = 3 + 3 * exportNumber;
         int currentProgress = 0;
         // Load the node.
-        final URL fxmlURL = fxmlFile.toURI().toURL();
         final URL cssURL = cssFile.toURI().toURL();
         final File tempCSSFile = File.createTempFile(cssFile.getName(), null);
         try (final FileOutputStream tempCSSOutput = new FileOutputStream(tempCSSFile)) {
             Files.copy(cssFile.toPath(), tempCSSOutput);
         }
         final URL tempCSSURL = tempCSSFile.toURI().toURL();
+        final URL fxmlURL = fxmlFile.toURI().toURL();
         final FXMLLoader fxmlLoader = new FXMLLoader(fxmlURL);
         final Region node = fxmlLoader.load();
 //            node.getStylesheets().add(cssURL.toExternalForm());
         node.getStylesheets().add(tempCSSURL.toExternalForm());
         updateProgress(currentProgress++, totalProgress);
+        if (isCancelled()) {
+            return null;
+        }
         //
         for (final Infection infection : infections) {
             for (final org.spc.health.epidemydesign.State state : infection.getStates()) {
@@ -81,20 +84,21 @@ public class GenerationTask extends Task<Void> {
                 // Apparently we can only manipulate pseudo classes on the JavaFX Application Thread.
                 Platform.runLater(() -> prepareControl(node, infection, state));
                 wait();
+                updateProgress(currentProgress++, totalProgress);
                 if (exception != null) {
                     throw exception;
-                } else if (isCancelled()) {
+                }
+                if (isCancelled()) {
                     return null;
                 }
-                updateProgress(currentProgress++, totalProgress);                
                 // Convert to Swing image.
                 final BufferedImage swingImage = SwingFXUtils.fromFXImage(fxImage, null);
                 fxImage = null;
                 updateProgress(currentProgress++, totalProgress);
                 // Export to file.
-                final String infectionName = infection.getName().replaceAll("[?]", "").replaceAll("\\s", "_");
-                final String stateName = state.getName().replaceAll("[?]", "").replaceAll("\\s", "_");
-                final String outputPath = String.format("%s-%s.%s", infectionName, stateName, format);
+                final String infectionName = infection.getFileName();
+                final String stateName = state.getName();
+                final String outputPath = String.format("%s_%s.%s", infectionName, stateName, format); // NOI18N.
                 final File outputFile = new File(folder, outputPath);
                 ImageIO.write(swingImage, format, outputFile);
                 updateProgress(currentProgress++, totalProgress);
@@ -107,15 +111,13 @@ public class GenerationTask extends Task<Void> {
 
     private final HashMap<org.spc.health.epidemydesign.State, PseudoClass> pseudoClassMap = new HashMap();
     private Image fxImage;
-    private final StackPane parent = new StackPane();
-    private final Scene scene = new Scene(parent);
     private Exception exception;
 
     private synchronized void prepareControl(final Region node, final Infection infection, final org.spc.health.epidemydesign.State state) {
         try {
             if (!isCancelled()) {
                 // Change the label.
-                final Label label = (Label) node.lookup(".label");
+                final Label label = (Label) node.lookup(".label"); // NOI18N.
                 if (label != null) {
                     label.setText(infection.getName());
                 }
@@ -126,10 +128,13 @@ public class GenerationTask extends Task<Void> {
                     pseudoClassMap.put(state, pseudoClass);
                 }
                 node.pseudoClassStateChanged(pseudoClass, true);
+                final StackPane parent = new StackPane();
                 parent.getChildren().add(node);
+                final Scene scene = new Scene(parent);
                 fxImage = scene.snapshot(null);
-                // Unsets the pseudo class.
+                // Clear scene content.
                 parent.getChildren().remove(node);
+                // Unsets the pseudo class.
                 node.pseudoClassStateChanged(pseudoClass, false);
             }
         } catch (Exception ex) {
