@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javax.imageio.ImageIO;
 import org.spc.health.epidemydesign.Infection;
 
@@ -129,8 +130,10 @@ public class GenerationTask extends Task<Void> {
                 }
                 node.pseudoClassStateChanged(pseudoClass, true);
                 final StackPane parent = new StackPane();
+                parent.setStyle("-fx-background-color: transparent;"); // NOI18N.
                 parent.getChildren().add(node);
                 final Scene scene = new Scene(parent);
+                scene.setFill(Color.TRANSPARENT);
                 fxImage = scene.snapshot(null);
                 // Clear scene content.
                 parent.getChildren().remove(node);
