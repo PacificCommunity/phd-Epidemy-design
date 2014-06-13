@@ -102,7 +102,7 @@ http://www.spc.int/
                         <Label styleClass="title" text="%PREVIEW_LABEL" />
                         <ComboBox fx:id="previewCombo" prefWidth="150.0" />
                         <Region fx:id="previewSpacer" HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" text="%REFRESH_LABEL" />
+                        <Button mnemonicParsing="false" onAction="#handleRefreshButton" text="%REFRESH_LABEL" />
                         <Button mnemonicParsing="false" onAction="#handlePreviewDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
                            <tooltip>
                               <Tooltip text="%RESET_TO_DEFAULT_TIP" />

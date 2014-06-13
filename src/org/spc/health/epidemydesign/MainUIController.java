@@ -38,6 +38,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.WorkerStateEvent;
@@ -127,14 +128,17 @@ public final class MainUIController extends ControllerBase implements Initializa
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        infections.addListener((ListChangeListener.Change<? extends Infection> change) -> {
+            List<Infection> comboList = new LinkedList<>();
+            comboList.add(null);
+            comboList.addAll(infections);
+            previewCombo.getItems().setAll(comboList);
+        });
         try {
             reloadFXMLFromTemplate();
             reloadCSSFromTemplate();
             reloadStatesFromTemplate();
             reloadInfectionsFromTemplate();
-            System.out.println(states);
-            System.out.println(infections);
-            populatePreviewPane();
         } catch (IOException ex) {
             Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -153,31 +157,27 @@ public final class MainUIController extends ControllerBase implements Initializa
         });
         populateStatesColumns();
         //
-        previewCombo.setItems(infections);
         previewCombo.valueProperty().addListener(previewSelectionInvalidationListener);
         previewCombo.setButtonCell(new InfectionListCell());
         previewCombo.setCellFactory((ListView<Infection> p) -> {
             return new InfectionListCell();
         });
+        previewCombo.setValue(null);
         //
         targetComboBox.getEditor().textProperty().addListener(targetPathInvalidationListener);
         //
         cssArea.textProperty().addListener(textInvalitationListener);
         fxmlArea.textProperty().addListener(textInvalitationListener);
+        //
+        populatePreviewPane();
+        changePreviewLabels();
     }
 
     ////////////////////////////////////////////////////////////////////////////
     /**
      * Called whenever selection in the preview combo changes.
      */
-    private final InvalidationListener previewSelectionInvalidationListener = (Observable observable) -> {
-        Platform.runLater(() -> {
-            final Infection infection = previewCombo.getValue();
-            final String text = (infection == null) ? I18N.getString("LABEL_LABEL") : infection.getName(); // NOI18N.
-            final Set<Node> allLabels = previewPane.lookupAll(".label"); // NOI18N.
-            allLabels.stream().map((Node node) -> (Label) node).forEach((Label label) -> label.setText(text));
-        });
-    };
+    private final InvalidationListener previewSelectionInvalidationListener = (Observable observable) -> changePreviewLabels();
 
     /**
      * Called whenever the text in the target folder combo editor is changed.
@@ -264,6 +264,15 @@ public final class MainUIController extends ControllerBase implements Initializa
         }
     }
 
+    private void changePreviewLabels() {
+        Platform.runLater(() -> {
+            final Infection infection = previewCombo.getValue();
+            final String text = (infection == null) ? I18N.getString("LABEL_LABEL") : infection.getName(); // NOI18N.
+            final Set<Node> allLabels = previewPane.lookupAll(".label"); // NOI18N.
+            allLabels.stream().map((Node node) -> (Label) node).forEach((Label label) -> label.setText(text));
+        });
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     /**
      * Called whenever the default button of the preview pane is clicked.
@@ -292,6 +301,15 @@ public final class MainUIController extends ControllerBase implements Initializa
                 targetComboBox.getItems().add(0, newPath);
             }
         }
+    }
+
+    /**
+     * Called whenever the refresh button is clicked.
+     */
+    @FXML
+    private void handleRefreshButton(final ActionEvent actionEvent) {
+        populatePreviewPane();
+        changePreviewLabels();
     }
 
     /**
@@ -510,6 +528,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             saveCSSToTemplate();
             saveFXMLToTemplate();
             populatePreviewPane();
+            changePreviewLabels();
         } catch (IOException ex) {
             Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
