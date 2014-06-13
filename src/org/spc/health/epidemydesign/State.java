@@ -12,11 +12,24 @@ import javafx.scene.paint.Color;
  * <br/>User can add new ones, cannot be an enum.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-final class State {
+public final class State {
 
-    String name;
-    Color color;
+    private final String name;
+    private final Color color;
 
+    public State(final String name, final Color color) {
+        this.name = name;
+        this.color = color;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public Color getColor() {
+        return color;
+    }
+    
     @Override
     public String toString() {
         return name;

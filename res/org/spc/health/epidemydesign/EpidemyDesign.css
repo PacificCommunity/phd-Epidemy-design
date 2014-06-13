@@ -11,6 +11,11 @@
 .action-bar > * > .tooltip {
     -fx-font-size: 1.0em;
 }
+.grid-pane {
+    -fx-padding: 6;
+    -fx-hgap: 6;
+    -fx-vgap: 6;
+}
 .editor {
     -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
     -fx-background-radius: 0px, 0px;
@@ -29,4 +34,9 @@
     -fx-font-weight: bold;
     -fx-text-fill: gray;
     -fx-opacity: 0.5;
+}
+.generate-button {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.5em;
+    -fx-base: firebrick;
 }

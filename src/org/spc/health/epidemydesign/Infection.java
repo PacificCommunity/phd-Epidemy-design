@@ -14,10 +14,22 @@ import javafx.collections.ObservableList;
  * <br/>User can add new ones, cannot be an enum.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-final class Infection {
+public final class Infection {
 
-    String name;
-    final ObservableList<State> states = FXCollections.observableList(new LinkedList<>());
+    private final String name;
+    private final ObservableList<State> states = FXCollections.observableList(new LinkedList<>());
+
+    public Infection(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ObservableList<State> getStates() {
+        return states;
+    }
 
     @Override
     public String toString() {

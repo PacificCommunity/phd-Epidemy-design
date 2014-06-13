@@ -110,6 +110,25 @@ http://www.spc.int/
                      </children>
                   </HBox>
                   <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" VBox.vgrow="ALWAYS" />
+                  <GridPane styleClass="grid-pane">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="NEVER" />
+                      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="NEVER" prefWidth="70.0" />
+                        <ColumnConstraints hgrow="NEVER" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="%TARGET_FOLDER_LABEL" />
+                        <ComboBox fx:id="targetComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                        <Button fx:id="targetBrowseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleTargetBrowseButton" text="%BROWSE_LABEL" GridPane.columnIndex="3" />
+                        <ProgressBar fx:id="generateProgressBar" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Button fx:id="generateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGenerateButton" styleClass="generate-button" text="%GENERATE_LABEL" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
                </children>
             </VBox>
         </items>

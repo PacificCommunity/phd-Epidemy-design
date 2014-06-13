@@ -38,7 +38,7 @@ public final class EpidemyDesign extends Application {
         final Scene scene = new Scene(root, 1200, 800);
         final URL cssURL = getClass().getResource("EpidemyDesign.css"); // NOI18N.
         scene.getStylesheets().add(cssURL.toExternalForm());
-        primaryStage.setTitle("Epidemy Design"); // NOI18N.
+        primaryStage.setTitle(String.format("%s %s", I18N.getString("APP_TITLE"), Settings.getVersion())); // NOI18N.
         final URL iconURL = getClass().getResource("AppIcon.png"); // NOI18N.
         final Image icon = new Image(iconURL.toExternalForm());
         stage = primaryStage;

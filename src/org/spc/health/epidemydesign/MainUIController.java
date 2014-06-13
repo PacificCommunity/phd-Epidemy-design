@@ -34,10 +34,13 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -47,7 +50,7 @@ import javafx.scene.Node;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TableColumn;
@@ -57,15 +60,16 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.util.Callback;
+import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
+import org.spc.health.epidemydesign.task.GenerationTask;
 
 /**
  * The main UI controller.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public final class MainUIController extends ControllerBase implements Initializable {
-    
+
     @FXML
     private TableView<Infection> infectionTable;
     @FXML
@@ -78,7 +82,11 @@ public final class MainUIController extends ControllerBase implements Initializa
     private VBox previewPane;
     @FXML
     private ComboBox<Infection> previewCombo;
-    
+    @FXML
+    private ComboBox<String> targetComboBox;
+    @FXML
+    private ProgressBar generateProgressBar;
+
     private final File homeFolder;
     private final File templateFolder;
     private final File fxmlFile;
@@ -87,7 +95,7 @@ public final class MainUIController extends ControllerBase implements Initializa
     private final File statesFile;
     private final ObservableList<State> states = FXCollections.observableList(new LinkedList<>());
     private final ObservableList<Infection> infections = FXCollections.observableList(new LinkedList<>());
-        
+
     public MainUIController() throws IOException {
         homeFolder = new File(System.getProperty("user.home"), ".EpidemyDesign"); // NOI18N.
         if (!homeFolder.exists()) {
@@ -114,7 +122,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             exportStatesFromSource();
         }
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
@@ -133,7 +141,7 @@ public final class MainUIController extends ControllerBase implements Initializa
         infectionTable.setItems(infections);
         infectionColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, String> p) -> {
             final Infection infection = p.getValue();
-            final String name = infection.name;
+            final String name = infection.getName();
             return new SimpleStringProperty(name);
         });
         populateStatesColumns();
@@ -141,14 +149,16 @@ public final class MainUIController extends ControllerBase implements Initializa
         previewCombo.setItems(infections);
         previewCombo.valueProperty().addListener(previewSelectionInvalidationListener);
         previewCombo.setButtonCell(new InfectionListCell());
-        previewCombo.setCellFactory((ListView<Infection> p) -> {            
+        previewCombo.setCellFactory((ListView<Infection> p) -> {
             return new InfectionListCell();
         });
+        //
+        targetComboBox.getEditor().textProperty().addListener(targetPathInvalidationListener);
         //
         cssArea.textProperty().addListener(textInvalitationListener);
         fxmlArea.textProperty().addListener(textInvalitationListener);
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////
     /**
      * Called whenever selection in the preview combo changes.
@@ -156,34 +166,47 @@ public final class MainUIController extends ControllerBase implements Initializa
     private final InvalidationListener previewSelectionInvalidationListener = (Observable observable) -> {
         Platform.runLater(() -> {
             final Infection infection = previewCombo.getValue();
-            final String text = infection == null ? I18N.getString("LABEL_LABEL") : infection.name; // NOI18N.
+            final String text = (infection == null) ? I18N.getString("LABEL_LABEL") : infection.getName(); // NOI18N.
             final Set<Node> allLabels = previewPane.lookupAll(".label"); // NOI18N.
             allLabels.stream().map((Node node) -> (Label) node).forEach((Label label) -> label.setText(text));
         });
     };
-    
+
     /**
-    * Called whenever the text in one of the editor has been modified.
-    */
+     * Called whenever the text in the target folder combo editor is changed.
+     */
+    private final InvalidationListener targetPathInvalidationListener = (Observable observable) -> {
+        Platform.runLater(() -> {
+            final String path = targetComboBox.getEditor().getText();
+            final File file = new File(path);
+            if (file.exists() && file.isDirectory()) {
+                Settings.getPrefs().put("last.output.folder", path);
+            }
+        });
+    };
+
+    /**
+     * Called whenever the text in one of the editor has been modified.
+     */
     private final InvalidationListener textInvalitationListener = (Observable observable) -> requestSaveAndReload();
-    
+
     ////////////////////////////////////////////////////////////////////////////    
     /**
-    * After loading infections, create new columns in the table for each state.
-    */
+     * After loading infections, create new columns in the table for each state.
+     */
     private void populateStatesColumns() {
         states.forEach((final State state) -> {
-            final TableColumn<Infection, Boolean> stateColumn = new TableColumn<>(state.name);
+            final TableColumn<Infection, Boolean> stateColumn = new TableColumn<>(state.getName());
             stateColumn.setEditable(true);
             stateColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, Boolean> p) -> {
                 final Infection infection = p.getValue();
-                final boolean activated = infection.states.contains(state);
+                final boolean activated = infection.getStates().contains(state);
                 final BooleanProperty property = new SimpleBooleanProperty(activated);
                 property.addListener((ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) -> {
                     if (newValue) {
-                        infection.states.add(state);
+                        infection.getStates().add(state);
                     } else {
-                        infection.states.remove(state);
+                        infection.getStates().remove(state);
                     }
                 });
                 return property;
@@ -192,10 +215,10 @@ public final class MainUIController extends ControllerBase implements Initializa
             infectionTable.getColumns().add(stateColumn);
         });
     }
-    
+
     /**
-    * Repopulate the preview pane.
-    */
+     * Repopulate the preview pane.
+     */
     private void populatePreviewPane() {
         // Remove old previews.
         previewPane.getChildren().clear();
@@ -219,7 +242,7 @@ public final class MainUIController extends ControllerBase implements Initializa
                     final Region node1 = fxmlLoader1.load();
 //                    node1.getStylesheets().add(cssURL.toExternalForm());
                     node1.getStylesheets().add(tempCSSURL.toExternalForm());
-                    final PseudoClass pseudoClass = PseudoClass.getPseudoClass(state.name);
+                    final PseudoClass pseudoClass = PseudoClass.getPseudoClass(state.getName());
                     node1.pseudoClassStateChanged(pseudoClass, true);
                     final Group group = new Group(node1);
                     final StackPane pane = new StackPane(group);
@@ -235,16 +258,78 @@ public final class MainUIController extends ControllerBase implements Initializa
     }
 
     ////////////////////////////////////////////////////////////////////////////
+    /**
+     * Called whenever the default button of the preview pane is clicked.
+     */
     @FXML
-    private void handlePreviewDefaultButton(ActionEvent event) {
+    private void handlePreviewDefaultButton(final ActionEvent actionEvent) {
         previewCombo.setValue(null);
     }
-    
+
+    /**
+     * Called whenever the browse button of the target folder is clicked.
+     */
+    @FXML
+    private void handleTargetBrowseButton(final ActionEvent actionEvent) {
+        final String path = Settings.getPrefs().get("last.output.folder", System.getProperty("user.home")); // NOI18N.
+        File folder = new File(path);
+        folder = (!folder.exists() || !folder.isDirectory()) ? new File(System.getProperty("user.home")) : folder; // NOI18N.
+        final DirectoryChooser dialog = new DirectoryChooser();
+        dialog.setInitialDirectory(folder);
+        folder = dialog.showDialog(previewPane.getScene().getWindow());
+        if (folder != null) {
+            final String newPath = folder.getAbsolutePath();
+            Settings.getPrefs().put("last.output.folder", newPath); // NOI18N.
+            targetComboBox.setValue(folder.getAbsolutePath());
+            if (!targetComboBox.getItems().contains(newPath)) {
+                targetComboBox.getItems().add(0, newPath);
+            }
+        }
+    }
+
+    /**
+     * The service that generates the images.
+     */
+    private Service<Void> generationService;
+
+    /**
+     * Called whenever the generate button is clicked.
+     */
+    @FXML
+    private void handleGenerateButton(final ActionEvent actionEvent) {
+        if (generationService != null) {
+            generationService.cancel();
+        } else {
+            generationService = new Service<Void>() {
+
+                @Override
+                protected Task<Void> createTask() {
+                    // Output folder.
+                    final String path = Settings.getPrefs().get("last.output.folder", System.getProperty("user.home")); // NOI18N.
+                    final File folder = new File(path);
+                    // Copy infection list.
+                    final List<Infection> infectionList = new LinkedList<>(infections);
+                    return new GenerationTask(folder, infectionList, fxmlFile, cssFile);
+                }
+            };
+            generationService.setOnSucceeded((final WorkerStateEvent workerStateEvent) -> {
+            });
+            generationService.setOnCancelled((final WorkerStateEvent workerStateEvent) -> {
+            });
+            generationService.setOnFailed((final WorkerStateEvent workerStateEvent) -> {
+                final Throwable ex = generationService.getException();
+                Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            });
+            generateProgressBar.progressProperty().bind(generationService.progressProperty());
+        }
+        generationService.restart();
+    }
+
     /**
      * Called whenever the CSS default button is clicked.
      */
     @FXML
-    private void handleCSSDefaultButton(ActionEvent event) {
+    private void handleCSSDefaultButton(final ActionEvent actionEvent) {
         try {
             exportCSSFromSource();
             reloadCSSFromTemplate();
@@ -257,7 +342,7 @@ public final class MainUIController extends ControllerBase implements Initializa
      * Called whenever the CSS link is clicked.
      */
     @FXML
-    private void handleCSSLink(ActionEvent event) {
+    private void handleCSSLink(final ActionEvent actionEvent) {
         final Optional<Application> application = Optional.ofNullable(getApplication());
         application.ifPresent((Application app) -> {
             // @todo get URL from properties.
@@ -270,7 +355,7 @@ public final class MainUIController extends ControllerBase implements Initializa
      * Called whenever the FXML default button is clicked.
      */
     @FXML
-    private void handleFXMLDefaultButton(ActionEvent event) {
+    private void handleFXMLDefaultButton(final ActionEvent actionEvent) {
         try {
             exportFXMLFromSource();
             reloadFXMLFromTemplate();
@@ -284,22 +369,22 @@ public final class MainUIController extends ControllerBase implements Initializa
         final URL url = getClass().getResource("template/template.css"); // NOI18N.
         exportSourceToTemplate(url, cssFile);
     }
-    
+
     private void exportFXMLFromSource() throws IOException {
         final URL url = getClass().getResource("template/template.fxml"); // NOI18N.
         exportSourceToTemplate(url, fxmlFile);
     }
-    
+
     private void exportInfectionsFromSource() throws IOException {
         final URL url = getClass().getResource("template/infections.properties"); // NOI18N.
         exportSourceToTemplate(url, infectionsFile);
     }
-    
+
     private void exportStatesFromSource() throws IOException {
         final URL url = getClass().getResource("template/states.properties"); // NOI18N.
         exportSourceToTemplate(url, statesFile);
     }
-    
+
     private void exportSourceToTemplate(final URL url, final File file) throws IOException {
         if (file.exists()) {
             file.delete();
@@ -308,15 +393,15 @@ public final class MainUIController extends ControllerBase implements Initializa
             Files.copy(input, file.toPath());
         }
     }
-    
+
     private void reloadCSSFromTemplate() throws IOException {
         reloadTextFromTemplate(cssFile, cssArea);
     }
-    
+
     private void reloadFXMLFromTemplate() throws IOException {
         reloadTextFromTemplate(fxmlFile, fxmlArea);
     }
-    
+
     private void reloadTextFromTemplate(final File file, final TextArea textArea) throws IOException {
         try (final FileReader fileReader = new FileReader(file)) {
             try (final LineNumberReader lineReader = new LineNumberReader(fileReader)) {
@@ -329,7 +414,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             }
         }
     }
-    
+
     private void reloadStatesFromTemplate() throws IOException {
         final Properties fileContent = new Properties();
         try (final FileInputStream input = new FileInputStream(statesFile)) {
@@ -343,14 +428,13 @@ public final class MainUIController extends ControllerBase implements Initializa
             return state;
         }).forEach((state) -> states.add(state));
     }
-    
+
     private State initializeState(final String name, final String colorName) {
-        final State state = new State();
-        state.name = name;
-        state.color = (colorName == null || colorName.trim().isEmpty()) ? Color.BLACK : Color.valueOf(colorName);
+        final Color color = (colorName == null || colorName.trim().isEmpty()) ? Color.BLACK : Color.valueOf(colorName);
+        final State state = new State(name, color);
         return state;
     }
-    
+
     private void reloadInfectionsFromTemplate() throws IOException {
         final Properties fileContent = new Properties();
         try (final FileInputStream input = new FileInputStream(infectionsFile)) {
@@ -359,31 +443,30 @@ public final class MainUIController extends ControllerBase implements Initializa
         final List<String> values = new ArrayList<>(fileContent.stringPropertyNames());
         Collections.sort(values);
         values.forEach((final String value) -> {
-            final Infection infection = new Infection();
             final String name = value.replaceAll("_", " ");
-            infection.name = name;
+            final Infection infection = new Infection(name);
             final String statesLine = fileContent.getProperty(value);
             final String[] tokens = statesLine.split("\\s+"); // NOI18N.
             for (final String token : tokens) {
-                final FilteredList<State> filteredStates = states.filtered((state) -> token.equals(state.name));
+                final FilteredList<State> filteredStates = states.filtered((state) -> token.equals(state.getName()));
                 if (filteredStates.isEmpty()) {
                     final State state = initializeState(token, null);
                     states.add(state);
                 }
-                infection.states.add(filteredStates.get(0));
+                infection.getStates().add(filteredStates.get(0));
             }
             infections.add(infection);
         });
     }
-    
+
     private void saveCSSToTemplate() throws IOException {
         saveToTemplate(cssArea, cssFile);
     }
-    
+
     private void saveFXMLToTemplate() throws IOException {
         saveToTemplate(fxmlArea, fxmlFile);
     }
-    
+
     private void saveToTemplate(final TextArea textArea, final File file) throws IOException {
         try (final PrintWriter writer = new PrintWriter(file)) {
             final String text = textArea.getText();
@@ -394,7 +477,7 @@ public final class MainUIController extends ControllerBase implements Initializa
     ////////////////////////////////////////////////////////////////////////////
     private Optional<PauseTransition> waitTimer = Optional.empty();
     private final Duration timerDuration = Duration.millis(750);
-    
+
     private void requestSaveAndReload() {
         System.out.println("requestSaveAndReload()");
         if (!waitTimer.isPresent()) {
@@ -407,10 +490,10 @@ public final class MainUIController extends ControllerBase implements Initializa
         }
         waitTimer.ifPresent((PauseTransition p) -> p.playFromStart());
     }
-    
+
     /**
-    * Save edited text and reload content of preview panel.
-    */
+     * Save edited text and reload content of preview panel.
+     */
     private void saveAndReload() {
         System.out.println("saveAndReload()");
         try {
