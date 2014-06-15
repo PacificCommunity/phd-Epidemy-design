@@ -180,7 +180,6 @@ public class CodeEditor extends Region {
     ////////////////////////////////////////////////////////////////////////////
     /**
      * Changes the editor mode of the HTML5 peer.
-     * <br/>Currently not working.
      */
     private void switchPeerMode() {
         final Optional<Mode> mode = Optional.ofNullable(getMode());
