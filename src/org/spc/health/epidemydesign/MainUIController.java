@@ -30,9 +30,11 @@ import javafx.application.Platform;
 import javafx.application.Application;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -63,6 +65,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
+import org.spc.health.epidemydesign.control.codeeditor.CodeEditor;
 import org.spc.health.epidemydesign.task.GenerationTask;
 
 /**
@@ -71,6 +74,8 @@ import org.spc.health.epidemydesign.task.GenerationTask;
  */
 public final class MainUIController extends ControllerBase implements Initializable {
 
+    private static final Logger LOGGER = Logger.getLogger(MainUIController.class.getName());
+
     @FXML
     private TableView<Infection> infectionTable;
     @FXML
@@ -78,9 +83,9 @@ public final class MainUIController extends ControllerBase implements Initializa
     @FXML
     private TableColumn<Infection, String> infectionFileColumn;
     @FXML
-    private TextArea cssArea;
+    private VBox cssContent;
     @FXML
-    private TextArea fxmlArea;
+    private VBox fxmlContent;
     @FXML
     private VBox previewPane;
     @FXML
@@ -98,6 +103,9 @@ public final class MainUIController extends ControllerBase implements Initializa
     private final File statesFile;
     private final ObservableList<State> states = FXCollections.observableList(new LinkedList<>());
     private final ObservableList<Infection> infections = FXCollections.observableList(new LinkedList<>());
+
+    private CodeEditor cssEditor;
+    private CodeEditor fxmlEditor;
 
     public MainUIController() throws IOException {
         homeFolder = new File(System.getProperty("user.home"), ".EpidemyDesign"); // NOI18N.
@@ -125,33 +133,37 @@ public final class MainUIController extends ControllerBase implements Initializa
             exportStatesFromSource();
         }
     }
+    
+    /**
+    * This binding is used to control whenever the code editor have been initialized.
+    */
+    private BooleanBinding codeEditorInitialized;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        infections.addListener((ListChangeListener.Change<? extends Infection> change) -> {
-            List<Infection> comboList = new LinkedList<>();
-            comboList.add(null);
-            comboList.addAll(infections);
-            previewCombo.getItems().setAll(comboList);
-        });
         try {
-            reloadFXMLFromTemplate();
-            reloadCSSFromTemplate();
             reloadStatesFromTemplate();
             reloadInfectionsFromTemplate();
         } catch (IOException ex) {
-            Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
+        infections.addListener((final ListChangeListener.Change<? extends Infection> change) -> {
+            final List<Infection> comboList = new LinkedList<>();
+            comboList.add(null);
+            comboList.addAll(infections);
+            previewCombo.getItems().setAll(comboList);
+            comboList.clear();
+        });
         //
         infectionTable.setEditable(true);
         infectionTable.setItems(infections);
-        infectionNameColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, String> p) -> {
-            final Infection infection = p.getValue();
+        infectionNameColumn.setCellValueFactory((final TableColumn.CellDataFeatures<Infection, String> cellDataFeature) -> {
+            final Infection infection = cellDataFeature.getValue();
             final String name = infection.getName();
             return new SimpleStringProperty(name);
         });
-        infectionFileColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, String> p) -> {
-            final Infection infection = p.getValue();
+        infectionFileColumn.setCellValueFactory((final TableColumn.CellDataFeatures<Infection, String> cellDataFeature) -> {
+            final Infection infection = cellDataFeature.getValue();
             final String fileName = infection.getFileName();
             return new SimpleStringProperty(fileName);
         });
@@ -159,18 +171,57 @@ public final class MainUIController extends ControllerBase implements Initializa
         //
         previewCombo.valueProperty().addListener(previewSelectionInvalidationListener);
         previewCombo.setButtonCell(new InfectionListCell());
-        previewCombo.setCellFactory((ListView<Infection> p) -> {
+        previewCombo.setCellFactory((final ListView<Infection> listView) -> {
             return new InfectionListCell();
         });
         previewCombo.setValue(null);
         //
         targetComboBox.getEditor().textProperty().addListener(targetPathInvalidationListener);
+        // CSS editor.
+        cssEditor = new CodeEditor();
+        VBox.setVgrow(cssEditor, Priority.ALWAYS);
+        cssContent.getChildren().add(cssEditor);
+        // FXML editor.
+        fxmlEditor = new CodeEditor();
+        VBox.setVgrow(fxmlEditor, Priority.ALWAYS);
+        fxmlContent.getChildren().add(fxmlEditor);
         //
-        cssArea.textProperty().addListener(textInvalitationListener);
-        fxmlArea.textProperty().addListener(textInvalitationListener);
-        //
-        populatePreviewPane();
-        changePreviewLabels();
+        codeEditorInitialized = new BooleanBinding() {
+            {
+                bind(cssEditor.initializedProperty(), fxmlEditor.initializedProperty());
+            }
+
+            @Override
+            public void dispose() {
+                unbind(cssEditor.initializedProperty(), fxmlEditor.initializedProperty());
+            }
+
+            @Override
+            protected boolean computeValue() {
+                final boolean cssReady = cssEditor.isInitialized();
+                final boolean fxmlReady = fxmlEditor.isInitialized();
+                return cssReady && fxmlReady;
+            }
+        };
+        codeEditorInitialized.addListener((final ObservableValue<? extends Boolean> observableValue, final Boolean oldValue, final Boolean newValue) -> {
+            if (newValue) {
+                try {
+                    cssEditor.setMode(CodeEditor.Mode.CSS);
+                    fxmlEditor.setMode(CodeEditor.Mode.XML);
+                    reloadCSSFromTemplate();
+                    reloadFXMLFromTemplate();
+                    populatePreviewPane();
+                    changePreviewLabels();
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+                } finally {
+                    cssEditor.textProperty().addListener(textInvalitationListener);
+                    fxmlEditor.textProperty().addListener(textInvalitationListener);
+                    codeEditorInitialized.dispose();
+                    codeEditorInitialized = null;
+                }
+            }
+        });
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -256,11 +307,11 @@ public final class MainUIController extends ControllerBase implements Initializa
                     VBox.setVgrow(pane, Priority.ALWAYS);
                     previewPane.getChildren().add(pane);
                 } catch (IOException ex) {
-                    Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             });
         } catch (Exception ex) {
-            Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -343,7 +394,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             });
             generationService.setOnFailed((final WorkerStateEvent workerStateEvent) -> {
                 final Throwable ex = generationService.getException();
-                Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
             });
             generateProgressBar.progressProperty().bind(generationService.progressProperty());
         }
@@ -359,7 +410,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             exportCSSFromSource();
             reloadCSSFromTemplate();
         } catch (IOException ex) {
-            Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -385,7 +436,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             exportFXMLFromSource();
             reloadFXMLFromTemplate();
         } catch (IOException ex) {
-            Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -420,14 +471,14 @@ public final class MainUIController extends ControllerBase implements Initializa
     }
 
     private void reloadCSSFromTemplate() throws IOException {
-        reloadTextFromTemplate(cssFile, cssArea);
+        reloadTextFromTemplate(cssFile, cssEditor);
     }
 
     private void reloadFXMLFromTemplate() throws IOException {
-        reloadTextFromTemplate(fxmlFile, fxmlArea);
+        reloadTextFromTemplate(fxmlFile, fxmlEditor);
     }
 
-    private void reloadTextFromTemplate(final File file, final TextArea textArea) throws IOException {
+    private void reloadTextFromTemplate(final File file, final CodeEditor editor) throws IOException {
         try (final FileReader fileReader = new FileReader(file)) {
             try (final LineNumberReader lineReader = new LineNumberReader(fileReader)) {
                 final StringBuilder builder = new StringBuilder();
@@ -435,7 +486,7 @@ public final class MainUIController extends ControllerBase implements Initializa
                     builder.append(line);
                     builder.append("\n");
                 }
-                textArea.setText(builder.toString());
+                editor.setText(builder.toString());
             }
         }
     }
@@ -488,16 +539,16 @@ public final class MainUIController extends ControllerBase implements Initializa
     }
 
     private void saveCSSToTemplate() throws IOException {
-        saveToTemplate(cssArea, cssFile);
+        saveToTemplate(cssEditor, cssFile);
     }
 
     private void saveFXMLToTemplate() throws IOException {
-        saveToTemplate(fxmlArea, fxmlFile);
+        saveToTemplate(fxmlEditor, fxmlFile);
     }
 
-    private void saveToTemplate(final TextArea textArea, final File file) throws IOException {
+    private void saveToTemplate(final CodeEditor editor, final File file) throws IOException {
         try (final PrintWriter writer = new PrintWriter(file)) {
-            final String text = textArea.getText();
+            final String text = editor.getText();
             writer.println(text);
         }
     }
@@ -530,7 +581,7 @@ public final class MainUIController extends ControllerBase implements Initializa
             populatePreviewPane();
             changePreviewLabels();
         } catch (IOException ex) {
-            Logger.getLogger(MainUIController.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 }

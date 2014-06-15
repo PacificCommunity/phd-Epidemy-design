@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CodeEditor</title>
+        <STYLE type="text/css">
+            body { 
+                margin-top: 0;
+                margin-left: 0;
+                margin-bottom: 0;
+                margin-right: 0;
+            }
+        </STYLE>
+    </head>
+    <body>
+        <!-- Create a simple CodeMirror instance -->
+        <link rel="stylesheet" href="lib/codemirror.css">
+        <script src="lib/codemirror.js"></script>
+        <script src="mode/css/css.js"></script>
+        <script src="mode/xml/xml.js"></script>
+        <script>
+            var editor = CodeMirror(document.body, {
+                lineWrapping: true,
+                lineNumbers: true,
+            });
+            editor.on('change', function() {
+                console.info("change");
+                java.updateText();
+            });
+            function clearText() {
+                editor.setValue('');
+            }
+            function setText(text) {
+                editor.setValue(text);
+            }
+            function getText() {
+                return editor.getValue();
+            }
+            function setMode(mode) {
+                editor.setOption("mode", mode);
+            }
+        </script>        
+    </body>
+</html>

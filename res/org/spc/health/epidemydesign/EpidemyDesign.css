@@ -16,15 +16,13 @@
     -fx-hgap: 6;
     -fx-vgap: 6;
 }
-.editor {
+.code-editor {
     -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
     -fx-background-radius: 0px, 0px;
     -fx-background-insets: 0px, 1px 0px 0px 0px;
     -fx-font-family: monospace;
     -fx-font-size: 0.9em;
-}
-.editor .content {
-    -fx-background-color: white;
+    -fx-padding: 2px 0px 0px 0px;
 }
 .preview-pane {
     -fx-background-image: url("transparency.png");

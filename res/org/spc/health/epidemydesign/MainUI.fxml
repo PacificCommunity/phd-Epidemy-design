@@ -40,7 +40,6 @@ http://www.spc.int/
                                        </tooltip></Button>
                                  </children>
                               </HBox>
-                              <TextArea fx:id="cssArea" prefHeight="200.0" prefWidth="200.0" styleClass="editor" wrapText="true" VBox.vgrow="ALWAYS" />
                            </children>
                         </VBox>
                         <VBox fx:id="fxmlContent" prefHeight="200.0" prefWidth="100.0">
@@ -62,7 +61,6 @@ http://www.spc.int/
                                        </tooltip></Button>
                                  </children>
                               </HBox>
-                              <TextArea fx:id="fxmlArea" prefHeight="200.0" prefWidth="200.0" styleClass="editor" wrapText="true" VBox.vgrow="ALWAYS" />
                            </children>
                         </VBox>
                      </items>
