@@ -16,7 +16,14 @@ final class InfectionListCell extends ListCell<Infection> {
     @Override
     protected void updateItem(Infection infection, boolean empty) {
         super.updateItem(infection, empty);
-        final String text = (infection == null) ? I18N.getString("DEFAULT_VALUE_LABEL") : infection.getName(); // NOI18N.
-        setText(text);
+        textProperty().unbind();
+        if (!empty) {
+            if (infection == null) {
+                final String text = I18N.getString("DEFAULT_VALUE_LABEL"); // NOI18N.
+                setText(text);
+            } else {
+                textProperty().bind(infection.nameProperty());
+            }
+        }
     }
 }
