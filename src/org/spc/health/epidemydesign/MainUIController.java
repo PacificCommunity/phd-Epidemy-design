@@ -34,7 +34,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -55,7 +54,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Priority;
@@ -64,6 +64,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.spc.health.epidemydesign.control.codeeditor.CodeEditor;
 import org.spc.health.epidemydesign.task.GenerationTask;
@@ -94,6 +95,10 @@ public final class MainUIController extends ControllerBase implements Initializa
     private ComboBox<String> targetComboBox;
     @FXML
     private ProgressBar generateProgressBar;
+    @FXML
+    private SplitMenuButton loadCSSButton;
+    @FXML
+    private SplitMenuButton loadFXMLButton;
 
     private final File homeFolder;
     private final File templateFolder;
@@ -133,10 +138,11 @@ public final class MainUIController extends ControllerBase implements Initializa
             exportStatesFromSource();
         }
     }
-    
+
     /**
-    * This binding is used to control whenever the code editor have been initialized.
-    */
+     * This binding is used to control whenever the code editor have been initialized.
+     * <br/>It's a member in order to avoid early GC.
+     */
     private BooleanBinding codeEditorInitialized;
 
     @Override
@@ -338,9 +344,10 @@ public final class MainUIController extends ControllerBase implements Initializa
      */
     @FXML
     private void handleTargetBrowseButton(final ActionEvent actionEvent) {
-        final String path = Settings.getPrefs().get("last.output.folder", System.getProperty("user.home")); // NOI18N.
+        final String userHome = System.getProperty("user.home"); // NOI18N.
+        final String path = Settings.getPrefs().get("last.output.folder", userHome); // NOI18N.
         File folder = new File(path);
-        folder = (!folder.exists() || !folder.isDirectory()) ? new File(System.getProperty("user.home")) : folder; // NOI18N.
+        folder = (!folder.exists() || !folder.isDirectory()) ? new File(userHome) : folder; // NOI18N.
         final DirectoryChooser dialog = new DirectoryChooser();
         dialog.setInitialDirectory(folder);
         folder = dialog.showDialog(previewPane.getScene().getWindow());
@@ -381,7 +388,8 @@ public final class MainUIController extends ControllerBase implements Initializa
                 @Override
                 protected Task<Void> createTask() {
                     // Output folder.
-                    final String path = Settings.getPrefs().get("last.output.folder", System.getProperty("user.home")); // NOI18N.
+                    String userHome = System.getProperty("user.home"); // NOI18N.
+                    final String path = Settings.getPrefs().get("last.output.folder", userHome); // NOI18N.
                     final File folder = new File(path);
                     // Copy infection list.
                     final List<Infection> infectionList = new LinkedList<>(infections);
@@ -440,7 +448,133 @@ public final class MainUIController extends ControllerBase implements Initializa
         }
     }
 
+    @FXML
+    private void handleSaveCSSButton(final ActionEvent actionEvent) {
+        exportTemplateMayBe(cssEditor, "css", loadCSSButton); // NOI18N.
+    }
+
+    @FXML
+    private void handleSaveFXMLButton(final ActionEvent actionEvent) {
+        exportTemplateMayBe(fxmlEditor, "fxml", loadFXMLButton); // NOI18N.
+    }
+
+    @FXML
+    private void handleLoadCSSButton(final ActionEvent actionEvent) {
+        importTemplateMayBe(cssEditor, "css", loadCSSButton); // NOI18N.
+    }
+
+    @FXML
+    private void handleLoadFXMLButton(final ActionEvent actionEvent) {
+        importTemplateMayBe(fxmlEditor, "fxml", loadFXMLButton); // NOI18N.
+    }
+
     ////////////////////////////////////////////////////////////////////////////
+    /**
+     * Display a file dialog box that allows the user to export a template.
+     * @param codeEditor Source code editor.
+     * @param extension File extension to use.
+     * @param loadButton The associated load button.
+     */
+    private void exportTemplateMayBe(final CodeEditor codeEditor, final String extension, final SplitMenuButton loadButton) {
+        final FileChooser dialog = prepareInputFileDialog(extension);
+        final File file = dialog.showSaveDialog(loadButton.getScene().getWindow());
+        if (file != null) {
+            Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
+            try {
+                exportTemplateToFile(codeEditor, file);
+                addFileToLoadButton(codeEditor, loadButton, file);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+    }
+
+    /**
+     * Prepare the file dialog for input files.
+     * @param extension File extension to be used.
+     * @return A {@code FileChooser} instance, never {@code null}.
+     */
+    private FileChooser prepareInputFileDialog(final String extension) {
+        final String userHome = System.getProperty("user.home"); // NOI18N.
+        final String path = Settings.getPrefs().get("last.input.folder", userHome); // NOI18N.
+        File folder = new File(path);
+        folder = (!folder.exists()) ? new File(userHome) : folder;
+        final FileChooser dialog = new FileChooser();
+        final String allDescription = I18N.getString("ALL_FILES_LABEL"); // NOI18N.
+        final String allExtension = String.format(I18N.getString("EXTENSION_XX_TEMPLATE"), "*"); // NOI18N.
+        final FileChooser.ExtensionFilter allFilter = new FileChooser.ExtensionFilter(allDescription, allExtension);
+        final String extensionDescription = String.format(I18N.getString("FILE_XX_TEMPLATE"), extension.toUpperCase()); // NOI18N.
+        final String extensionExtension = String.format(I18N.getString("EXTENSION_XX_TEMPLATE"), extension); // NOI18N.
+        final FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter(extensionDescription, extensionExtension);
+        dialog.getExtensionFilters().setAll(extensionFilter, allFilter);
+        dialog.setSelectedExtensionFilter(extensionFilter);
+        dialog.setInitialDirectory(folder);
+        dialog.setInitialFileName(String.format("template.%s", extension)); // NOI18N.
+        return dialog;
+    }
+
+    /**
+     * Add selected file to the load button's menu.
+     * @param codeEditor The code editor (used when activating the menu item).
+     * @param loadButton The load button which will host the menu.
+     * @param file The source file.
+     */
+    private void addFileToLoadButton(final CodeEditor codeEditor, final SplitMenuButton loadButton, final File file) {
+        boolean found = false;
+        for (final MenuItem menuItem : loadButton.getItems()) {
+            final File itemFile = (File) menuItem.getProperties().get("file"); // NOI18N.
+            if (file.equals(itemFile)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            final MenuItem menuItem = new MenuItem(file.getAbsolutePath());
+            menuItem.getProperties().put("file", file); // NOI18N.
+            menuItem.setOnAction((final ActionEvent actionEvent) -> {
+                try {
+                    reloadTextFromTemplate(file, codeEditor);
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            });
+            loadButton.getItems().add(menuItem);
+        }
+    }
+
+    /**
+     * Save current template into selected file.
+     * @param editor The source editor.
+     * @param file The target file.
+     * @throws IOException In case of IO error.
+     */
+    private void exportTemplateToFile(final CodeEditor editor, final File file) throws IOException {
+        final String text = editor.getText();
+        try (PrintWriter printWriter = new PrintWriter(file, "UTF-8")) { // NOI18N.
+            printWriter.print(text);
+        }
+    }
+
+    /**
+     * Display a file dialog box that allows the user to import a template.
+     * @param codeEditor Source code editor.
+     * @param extension File extension to use.
+     * @param loadButton The associated load button.
+     */
+    private void importTemplateMayBe(final CodeEditor codeEditor, final String extension, final SplitMenuButton loadButton) {
+        final FileChooser dialog = prepareInputFileDialog(extension);
+        final File file = dialog.showOpenDialog(loadButton.getScene().getWindow());
+        if (file != null) {
+            Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
+            try {
+                reloadTextFromTemplate(file, codeEditor);
+                addFileToLoadButton(codeEditor, loadButton, file);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+    }
+
     private void exportCSSFromSource() throws IOException {
         final URL url = getClass().getResource("template/template.css"); // NOI18N.
         exportSourceToTemplate(url, cssFile);

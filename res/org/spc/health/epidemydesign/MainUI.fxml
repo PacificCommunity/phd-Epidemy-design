@@ -27,13 +27,8 @@ http://www.spc.int/
                                     <Label styleClass="title" text="%CSS_LABEL" />
                                     <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%CSS_REFERENCE_GUIDE_LABEL" />
                                     <Region fx:id="cssBarSpacer" HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="saveCSSButton" mnemonicParsing="false" text="%SAVE_LABEL" />
-                                    <SplitMenuButton fx:id="loadCSSButton" mnemonicParsing="false" text="%LOAD_LABEL">
-                                      <items>
-                                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                                        <MenuItem mnemonicParsing="false" text="Action 2" />
-                                      </items>
-                                    </SplitMenuButton>
+                                    <Button fx:id="saveCSSButton" mnemonicParsing="false" onAction="#handleSaveCSSButton" text="%SAVE_LABEL" />
+                                    <SplitMenuButton fx:id="loadCSSButton" mnemonicParsing="false" onAction="#handleLoadCSSButton" text="%LOAD_LABEL" />
                                     <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
                                        <tooltip>
                                           <Tooltip text="%RESET_TO_DEFAULT_TIP" />
@@ -48,13 +43,8 @@ http://www.spc.int/
                                  <children>
                                     <Label styleClass="title" text="%FXML_LABEL" />
                                     <Region fx:id="fxmlBarSpacer" HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="saveFXMLButton" mnemonicParsing="false" text="%SAVE_LABEL" />
-                                    <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" text="%LOAD_LABEL">
-                                      <items>
-                                        <MenuItem mnemonicParsing="false" text="Action 1" />
-                                        <MenuItem mnemonicParsing="false" text="Action 2" />
-                                      </items>
-                                    </SplitMenuButton>
+                                    <Button fx:id="saveFXMLButton" mnemonicParsing="false" onAction="#handleSaveFXMLButton" text="%SAVE_LABEL" />
+                                    <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" onAction="#handleLoadFXMLButton" text="%LOAD_LABEL" />
                                     <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
                                        <tooltip>
                                           <Tooltip text="%RESET_TO_DEFAULT_TIP" />
@@ -111,21 +101,24 @@ http://www.spc.int/
                   <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" VBox.vgrow="ALWAYS" />
                   <GridPane styleClass="grid-pane" VBox.vgrow="NEVER">
                     <columnConstraints>
-                      <ColumnConstraints hgrow="NEVER" />
-                      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints />
+                      <ColumnConstraints hgrow="ALWAYS" />
+                        <ColumnConstraints hgrow="NEVER" minWidth="70.0" prefWidth="70.0" />
                         <ColumnConstraints hgrow="NEVER" prefWidth="70.0" />
                         <ColumnConstraints hgrow="NEVER" />
                     </columnConstraints>
                     <rowConstraints>
+                      <RowConstraints />
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Label text="%TARGET_FOLDER_LABEL" />
-                        <ComboBox fx:id="targetComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" />
-                        <Button fx:id="targetBrowseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleTargetBrowseButton" text="%BROWSE_LABEL" GridPane.columnIndex="3" />
-                        <ProgressBar fx:id="generateProgressBar" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Button fx:id="generateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGenerateButton" styleClass="generate-button" text="%GENERATE_LABEL" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
+                        <Label styleClass="title" text="%EXPORT_LABEL" GridPane.columnSpan="2147483647" />
+                        <Label text="%TARGET_FOLDER_LABEL" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="targetComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                        <Button fx:id="targetBrowseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleTargetBrowseButton" text="%BROWSE_LABEL" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <ProgressBar fx:id="generateProgressBar" maxWidth="1.7976931348623157E308" progress="0.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Button fx:id="generateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGenerateButton" styleClass="generate-button" text="%GENERATE_LABEL" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
                      </children>
                   </GridPane>
                </children>
