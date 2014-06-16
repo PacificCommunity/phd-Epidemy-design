@@ -30,10 +30,7 @@ import javafx.application.Platform;
 import javafx.application.Application;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -45,24 +42,17 @@ import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitMenuButton;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -72,6 +62,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.spc.health.epidemydesign.control.codeeditor.CodeEditor;
+import org.spc.health.epidemydesign.control.infectioneditor.InfectionEditorController;
 import org.spc.health.epidemydesign.task.GenerationTask;
 
 /**
@@ -83,12 +74,6 @@ public final class MainUIController extends ControllerBase implements Initializa
     private static final Logger LOGGER = Logger.getLogger(MainUIController.class.getName());
     private static final String ENCODING = "UTF-8";
 
-    @FXML
-    private TableView<Infection> infectionTable;
-    @FXML
-    private TableColumn<Infection, String> infectionNameColumn;
-    @FXML
-    private TableColumn<Infection, String> infectionFileColumn;
     @FXML
     private VBox cssContent;
     @FXML
@@ -106,13 +91,7 @@ public final class MainUIController extends ControllerBase implements Initializa
     @FXML
     private SplitMenuButton loadFXMLButton;
     @FXML
-    private TextField infectionsField;
-    @FXML
-    private Button addInfectionsButton;
-    @FXML
-    private Button deleteInfectionsButton;
-    @FXML
-    private SplitMenuButton loadInfectionsButton;
+    private InfectionEditorController infectionEditorController;
 
     private final File homeFolder;
     private final File templateFolder;
@@ -175,19 +154,27 @@ public final class MainUIController extends ControllerBase implements Initializa
             LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
         //
-        infectionTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        infectionTable.setEditable(true);
-        infectionTable.setItems(infections);
-        //
-        infectionNameColumn.setCellValueFactory(new PropertyValueFactory("name"));
-        infectionNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        infectionNameColumn.setEditable(true);
-        //
-        infectionFileColumn.setCellValueFactory(new PropertyValueFactory("fileName"));
-        infectionFileColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        infectionFileColumn.setEditable(true);
-        //
-        populateStatesColumns();
+        infectionEditorController.applicationProperty().bind(applicationProperty());
+        infectionEditorController.setInfections(infections);
+        infectionEditorController.setStates(states);
+        infectionEditorController.setOnInfectionSave((ActionEvent t) -> saveInfectionsMayBe());
+        infectionEditorController.setOnInfectionLoad((ActionEvent t) -> importInfectionsMayBe());
+        infectionEditorController.setOnInfectionDefault((ActionEvent t) -> {
+            try {
+                exportInfectionsFromSource();
+                reloadInfectionsFromTemplate();
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        });
+        infectionEditorController.setOnInfectionFile((final File file) -> {
+            try {
+                clearInfections();
+                reloadInfectionsFromFile(file);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        });
         //
         previewCombo.valueProperty().addListener(previewSelectionInvalidationListener);
         previewCombo.setButtonCell(new InfectionListCell());
@@ -195,9 +182,6 @@ public final class MainUIController extends ControllerBase implements Initializa
         previewCombo.setValue(null);
         //
         targetComboBox.getEditor().textProperty().addListener(targetPathInvalidationListener);
-        //
-        addInfectionsButton.disableProperty().bind(Bindings.isEmpty(infectionsField.textProperty()));
-        deleteInfectionsButton.disableProperty().bind(Bindings.isEmpty(infectionTable.getSelectionModel().getSelectedCells()));
         // CSS editor.
         cssEditor = new CodeEditor();
         VBox.setVgrow(cssEditor, Priority.ALWAYS);
@@ -274,31 +258,6 @@ public final class MainUIController extends ControllerBase implements Initializa
     private final InvalidationListener textInvalitationListener = (Observable observable) -> requestSaveAndReload();
 
     ////////////////////////////////////////////////////////////////////////////    
-    /**
-     * After loading infections, create new columns in the table for each state.
-     */
-    private void populateStatesColumns() {
-        states.forEach((final State state) -> {
-            final TableColumn<Infection, Boolean> stateColumn = new TableColumn<>(state.getName());
-            stateColumn.setEditable(true);
-            stateColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, Boolean> p) -> {
-                final Infection infection = p.getValue();
-                final boolean activated = infection.getStates().contains(state);
-                final BooleanProperty property = new SimpleBooleanProperty(activated);
-                property.addListener((ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) -> {
-                    if (newValue) {
-                        infection.getStates().add(state);
-                    } else {
-                        infection.getStates().remove(state);
-                    }
-                });
-                return property;
-            });
-            stateColumn.setCellFactory(CheckBoxTableCell.forTableColumn(stateColumn));
-            infectionTable.getColumns().add(stateColumn);
-        });
-    }
-
     /**
      * Repopulate the preview pane.
      */
@@ -515,7 +474,7 @@ public final class MainUIController extends ControllerBase implements Initializa
      * @param loadButton The associated load button.
      */
     private void exportTemplateMayBe(final CodeEditor codeEditor, final String extension, final SplitMenuButton loadButton) {
-        final FileChooser dialog = prepareInputFileDialog(extension);
+        final FileChooser dialog = prepareInputFileDialog("template", extension);
         final File file = dialog.showSaveDialog(loadButton.getScene().getWindow());
         if (file != null) {
             Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
@@ -530,10 +489,11 @@ public final class MainUIController extends ControllerBase implements Initializa
 
     /**
      * Prepare the file dialog for input files.
+     * @param prefix File prefix to be used.
      * @param extension File extension to be used.
      * @return A {@code FileChooser} instance, never {@code null}.
      */
-    private FileChooser prepareInputFileDialog(final String extension) {
+    private FileChooser prepareInputFileDialog(final String prefix, final String extension) {
         final String userHome = System.getProperty("user.home"); // NOI18N.
         final String path = Settings.getPrefs().get("last.input.folder", userHome); // NOI18N.
         File folder = new File(path);
@@ -548,7 +508,7 @@ public final class MainUIController extends ControllerBase implements Initializa
         dialog.getExtensionFilters().setAll(extensionFilter, allFilter);
         dialog.setSelectedExtensionFilter(extensionFilter);
         dialog.setInitialDirectory(folder);
-        dialog.setInitialFileName(String.format("template.%s", extension)); // NOI18N.
+        dialog.setInitialFileName(String.format("%s.%s", prefix, extension)); // NOI18N.
         return dialog;
     }
 
@@ -601,7 +561,7 @@ public final class MainUIController extends ControllerBase implements Initializa
      * @param loadButton The associated load button.
      */
     private void importTemplateMayBe(final CodeEditor codeEditor, final String extension, final SplitMenuButton loadButton) {
-        final FileChooser dialog = prepareInputFileDialog(extension);
+        final FileChooser dialog = prepareInputFileDialog("template", extension);
         final File file = dialog.showOpenDialog(loadButton.getScene().getWindow());
         if (file != null) {
             Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
@@ -732,16 +692,30 @@ public final class MainUIController extends ControllerBase implements Initializa
         });
     }
 
+    /**
+     * Called whenever one of the text values of an infection changes.
+     */
     private final InvalidationListener infectionValueInvalidationListener = (Observable observable) -> {
         Platform.runLater(() -> {
-            saveInfectionsToTemplate();
-            changePreviewLabels();
+            try {
+                saveInfectionsToTemplate();
+                changePreviewLabels();
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         });
     };
+
+    /**
+     * Called whenever the state list of an infection changes content.
+     */
     private final ListChangeListener<State> invalidationStateListChangeListener = (ListChangeListener.Change<? extends State> change) -> {
         Platform.runLater(() -> {
-            saveInfectionsToTemplate();
-            changePreviewLabels();
+            try {
+                saveInfectionsToTemplate();
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         });
     };
 
@@ -760,12 +734,38 @@ public final class MainUIController extends ControllerBase implements Initializa
         }
     }
 
-    private void saveInfectionsToTemplate() {
-        try {
-            saveInfectionsToFile(infectionsFile);
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+    private void importInfectionsMayBe() {
+        final FileChooser dialog = prepareInputFileDialog("infections", "properties");
+        final File file = dialog.showOpenDialog(loadCSSButton.getScene().getWindow());
+        if (file != null) {
+            Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
+            try {
+                infections.clear();
+                reloadInfectionsFromFile(file);
+                if (!infectionEditorController.getRecentFiles().contains(file)) {
+                    infectionEditorController.getRecentFiles().add(file);
+                }
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         }
+    }
+
+    private void saveInfectionsMayBe() {
+        final FileChooser dialog = prepareInputFileDialog("infections", "properties"); // NOI18N.
+        final File file = dialog.showSaveDialog(loadCSSButton.getScene().getWindow());
+        if (file != null) {
+            Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
+            try {
+                saveInfectionsToFile(file);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private void saveInfectionsToTemplate() throws IOException {
+        saveInfectionsToFile(infectionsFile);
     }
 
     private void saveInfectionsToFile(final File file) throws IOException {
@@ -774,15 +774,15 @@ public final class MainUIController extends ControllerBase implements Initializa
                 final StringBuilder line = new StringBuilder();
                 final String name = infection.getName();
                 line.append(name);
-                line.append("=");
+                line.append("="); // NOI18N.
                 final String fileName = infection.getFileName();
                 if (fileName != null && !fileName.trim().isEmpty()) {
                     line.append(fileName);
-                    line.append("|");
+                    line.append("|"); // NOI18N.
                 }
                 infection.getStates().forEach((final State state) -> {
                     line.append(state);
-                    line.append(" ");
+                    line.append(" "); // NOI18N.
                 });
                 writer.println(line.toString().trim());
             });
@@ -814,6 +814,7 @@ public final class MainUIController extends ControllerBase implements Initializa
         try {
             saveCSSToTemplate();
             saveFXMLToTemplate();
+            saveInfectionsToTemplate();
             populatePreviewPane();
             changePreviewLabels();
         } catch (IOException ex) {
