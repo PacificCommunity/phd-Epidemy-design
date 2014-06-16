@@ -5,16 +5,17 @@
  ***********************************************************************/
 .action-bar {
     -fx-font-size: 0.8em;
-    -fx-spacing: 2px;
-    -fx-padding: 2px;
+    -fx-spacing: 4px;
+    -fx-padding: 4px;
 }
-.action-bar > * > .tooltip {
+.action-bar > * > .tooltip,
+.action-bar .text-field {
     -fx-font-size: 1.0em;
 }
 .grid-pane {
-    -fx-padding: 6;
-    -fx-hgap: 6;
-    -fx-vgap: 6;
+    -fx-padding: 4px;
+    -fx-hgap: 4px;
+    -fx-vgap: 4px;
 }
 .code-editor {
     -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
