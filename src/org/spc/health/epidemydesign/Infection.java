@@ -16,7 +16,7 @@ import javafx.collections.ObservableList;
  * <br/>User can add new ones, cannot be an enum.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-public final class Infection {
+public final class Infection implements Comparable<Infection> {
 
     private final String id;
 
@@ -40,6 +40,10 @@ public final class Infection {
         return id;
     }
 
+    @Override
+    public int compareTo(Infection otherInfection) {
+        return id.compareTo(otherInfection.id);
+    }
     ////////////////////////////////////////////////////////////////////////////
     private final StringProperty name = new SimpleStringProperty(this, "name"); // NOI18N.
 
