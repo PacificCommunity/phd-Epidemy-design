@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.media.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.control.stateeditor.StateEditorController">
+   <children>
+      <HBox styleClass="action-bar">
+         <children>
+            <Label fx:id="statesLabel" styleClass="title" text="%STATES_LABEL" />
+            <TextField fx:id="statesField" prefWidth="75.0" />
+            <Button fx:id="addStatesButton" mnemonicParsing="false" text="%ADD_LABEL" />
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="removeStatesButton" mnemonicParsing="false" text="%DELETE_LABEL" />
+            <Pane fx:id="filler" HBox.hgrow="ALWAYS" />
+            <Button fx:id="saveStatesButton" mnemonicParsing="false" text="%SAVE_LABEL" />
+            <SplitMenuButton fx:id="loadStatesButton" mnemonicParsing="false" text="%LOAD_LABEL" />
+            <Button fx:id="resetStatesButton" mnemonicParsing="false" onAction="#handleStatesDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+               <tooltip>
+                  <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+               </tooltip>
+            </Button>
+         </children>
+      </HBox>
+      <ListView fx:id="statesListView" VBox.vgrow="ALWAYS" />
+   </children>
+</VBox>
