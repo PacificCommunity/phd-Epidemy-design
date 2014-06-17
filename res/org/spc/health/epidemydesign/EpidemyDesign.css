@@ -4,12 +4,13 @@
  *  http://www.spc.int/                                                *
  ***********************************************************************/
 .action-bar {
-    -fx-font-size: 0.8em;
+    -fx-fill-height: true;
+    -fx-alignment: center-left;
+    -fx-font-size: 0.9em;
     -fx-spacing: 4px;
     -fx-padding: 4px;
 }
-.action-bar > * > .tooltip,
-.action-bar .text-field {
+.action-bar > * > .tooltip {
     -fx-font-size: 1.0em;
 }
 .grid-pane {
@@ -29,7 +30,7 @@
     -fx-background-image: url("transparency.png");
 }
 .title {
-    -fx-font-size: 1.5em;
+    -fx-font-size: 1.2em;
     -fx-font-weight: bold;
     -fx-text-fill: gray;
     -fx-opacity: 0.5;
