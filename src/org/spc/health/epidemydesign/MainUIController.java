@@ -42,14 +42,12 @@ import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitMenuButton;
@@ -58,10 +56,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.spc.health.epidemydesign.control.codeeditor.CodeEditor;
+import org.spc.health.epidemydesign.control.generatepane.GeneratePaneController;
 import org.spc.health.epidemydesign.control.infectioneditor.InfectionEditorController;
 import org.spc.health.epidemydesign.task.GenerationTask;
 
@@ -83,15 +81,13 @@ public final class MainUIController extends ControllerBase implements Initializa
     @FXML
     private ComboBox<Infection> previewCombo;
     @FXML
-    private ComboBox<String> targetComboBox;
-    @FXML
-    private ProgressBar generateProgressBar;
-    @FXML
     private SplitMenuButton loadCSSButton;
     @FXML
     private SplitMenuButton loadFXMLButton;
     @FXML
     private InfectionEditorController infectionEditorController;
+    @FXML
+    private GeneratePaneController generatePaneController;
 
     private final File homeFolder;
     private final File templateFolder;
@@ -157,9 +153,9 @@ public final class MainUIController extends ControllerBase implements Initializa
         infectionEditorController.applicationProperty().bind(applicationProperty());
         infectionEditorController.setInfections(infections);
         infectionEditorController.setStates(states);
-        infectionEditorController.setOnInfectionSave((ActionEvent t) -> saveInfectionsMayBe());
-        infectionEditorController.setOnInfectionLoad((ActionEvent t) -> importInfectionsMayBe());
-        infectionEditorController.setOnInfectionDefault((ActionEvent t) -> {
+        infectionEditorController.setOnInfectionSave((final ActionEvent actionEvent) -> saveInfectionsMayBe());
+        infectionEditorController.setOnInfectionLoad((final ActionEvent actionEvent) -> importInfectionsMayBe());
+        infectionEditorController.setOnInfectionDefault((final ActionEvent actionEvent) -> {
             try {
                 exportInfectionsFromSource();
                 reloadInfectionsFromTemplate();
@@ -176,12 +172,12 @@ public final class MainUIController extends ControllerBase implements Initializa
             }
         });
         //
+        generatePaneController.setOnGenerate((final ActionEvent actionEvent) -> generateOutput());
+        //
         previewCombo.valueProperty().addListener(previewSelectionInvalidationListener);
         previewCombo.setButtonCell(new InfectionListCell());
         previewCombo.setCellFactory((final ListView<Infection> listView) -> new InfectionListCell());
         previewCombo.setValue(null);
-        //
-        targetComboBox.getEditor().textProperty().addListener(targetPathInvalidationListener);
         // CSS editor.
         cssEditor = new CodeEditor();
         VBox.setVgrow(cssEditor, Priority.ALWAYS);
@@ -236,19 +232,6 @@ public final class MainUIController extends ControllerBase implements Initializa
     private final InvalidationListener previewSelectionInvalidationListener = (Observable observable) -> {
         Platform.runLater(() -> {
             changePreviewLabels();
-        });
-    };
-
-    /**
-     * Called whenever the text in the target folder combo editor is changed.
-     */
-    private final InvalidationListener targetPathInvalidationListener = (Observable observable) -> {
-        Platform.runLater(() -> {
-            final String path = targetComboBox.getEditor().getText();
-            final File file = new File(path);
-            if (file.exists() && file.isDirectory()) {
-                Settings.getPrefs().put("last.output.folder", path); // NOI18N.
-            }
         });
     };
 
@@ -318,73 +301,12 @@ public final class MainUIController extends ControllerBase implements Initializa
     }
 
     /**
-     * Called whenever the browse button of the target folder is clicked.
-     */
-    @FXML
-    private void handleTargetBrowseButton(final ActionEvent actionEvent) {
-        final String userHome = System.getProperty("user.home"); // NOI18N.
-        final String path = Settings.getPrefs().get("last.output.folder", userHome); // NOI18N.
-        File folder = new File(path);
-        folder = (!folder.exists() || !folder.isDirectory()) ? new File(userHome) : folder; // NOI18N.
-        final DirectoryChooser dialog = new DirectoryChooser();
-        dialog.setInitialDirectory(folder);
-        folder = dialog.showDialog(previewPane.getScene().getWindow());
-        if (folder != null) {
-            final String newPath = folder.getAbsolutePath();
-            Settings.getPrefs().put("last.output.folder", newPath); // NOI18N.
-            targetComboBox.setValue(folder.getAbsolutePath());
-            if (!targetComboBox.getItems().contains(newPath)) {
-                targetComboBox.getItems().add(0, newPath);
-            }
-        }
-    }
-
-    /**
      * Called whenever the refresh button is clicked.
      */
     @FXML
     private void handleRefreshButton(final ActionEvent actionEvent) {
         populatePreviewPane();
         changePreviewLabels();
-    }
-
-    /**
-     * The service that generates the images.
-     */
-    private Service<Void> generationService;
-
-    /**
-     * Called whenever the generate button is clicked.
-     */
-    @FXML
-    private void handleGenerateButton(final ActionEvent actionEvent) {
-        if (generationService != null) {
-            generationService.cancel();
-        } else {
-            generationService = new Service<Void>() {
-
-                @Override
-                protected Task<Void> createTask() {
-                    // Output folder.
-                    String userHome = System.getProperty("user.home"); // NOI18N.
-                    final String path = Settings.getPrefs().get("last.output.folder", userHome); // NOI18N.
-                    final File folder = new File(path);
-                    // Copy infection list.
-                    final List<Infection> infectionList = new LinkedList<>(infections);
-                    return new GenerationTask(folder, infectionList, fxmlFile, cssFile);
-                }
-            };
-            generationService.setOnSucceeded((final WorkerStateEvent workerStateEvent) -> {
-            });
-            generationService.setOnCancelled((final WorkerStateEvent workerStateEvent) -> {
-            });
-            generationService.setOnFailed((final WorkerStateEvent workerStateEvent) -> {
-                final Throwable ex = generationService.getException();
-                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-            });
-            generateProgressBar.progressProperty().bind(generationService.progressProperty());
-        }
-        generationService.restart();
     }
 
     /**
@@ -821,4 +743,43 @@ public final class MainUIController extends ControllerBase implements Initializa
             LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
+
+    /**
+     * The service that generates the images.
+     */
+    private Service<Void> generationService;
+
+    private void generateOutput() {
+        if (generationService != null) {
+            generationService.cancel();
+        } else {
+            generatePaneController.setProgress(0);
+            generationService = new Service<Void>() {
+
+                @Override
+                protected Task<Void> createTask() {
+                    // Output folder.
+                    String userHome = System.getProperty("user.home"); // NOI18N.
+                    final String path = Settings.getPrefs().get("last.output.folder", userHome); // NOI18N.
+                    final File folder = new File(path);
+                    // Copy infection list.
+                    final List<Infection> infectionList = new LinkedList<>(infections);
+                    return new GenerationTask(folder, infectionList, fxmlFile, cssFile);
+                }
+            };
+            generationService.setOnSucceeded((final WorkerStateEvent workerStateEvent) -> {
+                LOGGER.log(Level.INFO, "Output generation succeeded.");
+            });
+            generationService.setOnCancelled((final WorkerStateEvent workerStateEvent) -> {
+                LOGGER.log(Level.INFO, "Output generation canceled.");
+            });
+            generationService.setOnFailed((final WorkerStateEvent workerStateEvent) -> {
+                final Throwable ex = generationService.getException();
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            });
+            generatePaneController.progressProperty().bind(generationService.progressProperty());
+        }
+        generationService.restart();
+    }
+
 }

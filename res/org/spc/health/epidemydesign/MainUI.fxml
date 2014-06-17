@@ -12,50 +12,65 @@ http://www.spc.int/
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane id="BorderPane" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.MainUIController">
+<BorderPane id="BorderPane" prefHeight="900.0" prefWidth="1400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.MainUIController">
    <center>
-      <SplitPane dividerPositions="0.66" layoutX="-7.0" layoutY="49.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.8" layoutX="-7.0" layoutY="49.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
-            <SplitPane dividerPositions="0.66" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+            <SplitPane dividerPositions="0.5" prefHeight="200.0" prefWidth="160.0">
               <items>
-                  <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0">
-                     <items>
-                        <VBox fx:id="cssContent" prefHeight="200.0" prefWidth="100.0">
-                           <children>
-                              <HBox alignment="CENTER_LEFT" styleClass="action-bar">
+                  <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                      <Tab text="%STYLE_LABEL">
+                           <content>
+                              <VBox fx:id="cssContent" prefHeight="200.0" prefWidth="100.0">
                                  <children>
-                                    <Label styleClass="title" text="%CSS_LABEL" />
-                                    <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%CSS_REFERENCE_GUIDE_LABEL" />
-                                    <Region fx:id="cssBarSpacer" HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="saveCSSButton" mnemonicParsing="false" onAction="#handleSaveCSSButton" text="%SAVE_LABEL" />
-                                    <SplitMenuButton fx:id="loadCSSButton" mnemonicParsing="false" onAction="#handleLoadCSSButton" text="%LOAD_LABEL" />
-                                    <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
-                                       <tooltip>
-                                          <Tooltip text="%RESET_TO_DEFAULT_TIP" />
-                                       </tooltip></Button>
+                                    <HBox alignment="CENTER_LEFT" styleClass="action-bar">
+                                       <children>
+                                          <Label styleClass="title" text="%CSS_LABEL" />
+                                          <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%CSS_REFERENCE_GUIDE_LABEL" />
+                                          <Region fx:id="cssBarSpacer" HBox.hgrow="ALWAYS" />
+                                          <Button fx:id="saveCSSButton" mnemonicParsing="false" onAction="#handleSaveCSSButton" text="%SAVE_LABEL" />
+                                          <SplitMenuButton fx:id="loadCSSButton" mnemonicParsing="false" onAction="#handleLoadCSSButton" text="%LOAD_LABEL" />
+                                          <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                                             <tooltip>
+                                                <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                                             </tooltip>
+                                          </Button>
+                                       </children>
+                                    </HBox>
                                  </children>
-                              </HBox>
-                           </children>
-                        </VBox>
-                        <VBox fx:id="fxmlContent" prefHeight="200.0" prefWidth="100.0">
-                           <children>
-                              <HBox alignment="CENTER_LEFT" styleClass="action-bar">
+                              </VBox>
+                           </content>
+                      </Tab>
+                      <Tab text="%SHAPE_LABEL">
+                           <content>
+                              <VBox fx:id="fxmlContent" prefHeight="200.0" prefWidth="100.0">
                                  <children>
-                                    <Label styleClass="title" text="%FXML_LABEL" />
-                                    <Region fx:id="fxmlBarSpacer" HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="saveFXMLButton" mnemonicParsing="false" onAction="#handleSaveFXMLButton" text="%SAVE_LABEL" />
-                                    <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" onAction="#handleLoadFXMLButton" text="%LOAD_LABEL" />
-                                    <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
-                                       <tooltip>
-                                          <Tooltip text="%RESET_TO_DEFAULT_TIP" />
-                                       </tooltip></Button>
+                                    <HBox alignment="CENTER_LEFT" styleClass="action-bar">
+                                       <children>
+                                          <Label styleClass="title" text="%FXML_LABEL" />
+                                          <Region fx:id="fxmlBarSpacer" HBox.hgrow="ALWAYS" />
+                                          <Button fx:id="saveFXMLButton" mnemonicParsing="false" onAction="#handleSaveFXMLButton" text="%SAVE_LABEL" />
+                                          <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" onAction="#handleLoadFXMLButton" text="%LOAD_LABEL" />
+                                          <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                                             <tooltip>
+                                                <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                                             </tooltip>
+                                          </Button>
+                                       </children>
+                                    </HBox>
                                  </children>
-                              </HBox>
-                           </children>
-                        </VBox>
-                     </items>
+                              </VBox>
+                           </content>
+                      </Tab>
+                    </tabs>
+                  </TabPane>
+                  <SplitPane dividerPositions="0.33" orientation="VERTICAL" prefHeight="160.0" prefWidth="200.0">
+                    <items>
+                        <fx:include source="control/stateeditor/StateEditor.fxml" />
+                        <fx:include fx:id="infectionEditor" source="control/infectioneditor/InfectionEditor.fxml" />
+                    </items>
                   </SplitPane>
-                  <fx:include fx:id="infectionEditor" source="control/infectioneditor/InfectionEditor.fxml" />
               </items>
             </SplitPane>
             <VBox prefHeight="200.0" prefWidth="100.0">
@@ -63,7 +78,7 @@ http://www.spc.int/
                   <HBox styleClass="action-bar" VBox.vgrow="NEVER">
                      <children>
                         <Label styleClass="title" text="%PREVIEW_LABEL" />
-                        <ComboBox fx:id="previewCombo" prefWidth="150.0" />
+                        <ComboBox fx:id="previewCombo" prefWidth="100.0" />
                         <Region fx:id="previewSpacer" HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#handleRefreshButton" text="%REFRESH_LABEL" />
                         <Button mnemonicParsing="false" onAction="#handlePreviewDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
@@ -74,31 +89,12 @@ http://www.spc.int/
                      </children>
                   </HBox>
                   <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" VBox.vgrow="ALWAYS" />
-                  <GridPane styleClass="grid-pane" VBox.vgrow="NEVER">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="NEVER" />
-                      <ColumnConstraints hgrow="ALWAYS" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" />
-                        <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
-                        <ColumnConstraints hgrow="NEVER" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <Label styleClass="title" text="%EXPORT_LABEL" GridPane.columnSpan="2147483647" />
-                        <Label text="%TARGET_FOLDER_LABEL" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="targetComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-                        <Button fx:id="targetBrowseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleTargetBrowseButton" text="%BROWSE_LABEL" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                        <ProgressBar fx:id="generateProgressBar" maxWidth="1.7976931348623157E308" prefWidth="194.0" progress="0.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-                        <Button fx:id="generateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGenerateButton" styleClass="generate-button" text="%GENERATE_LABEL" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-                     </children>
-                  </GridPane>
                </children>
             </VBox>
         </items>
       </SplitPane>
    </center>
+   <bottom>
+      <fx:include fx:id="generatePane" source="control/generatepane/GeneratePane.fxml" />
+   </bottom>
 </BorderPane>
