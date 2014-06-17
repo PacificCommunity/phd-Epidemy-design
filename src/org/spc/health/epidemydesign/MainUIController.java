@@ -37,6 +37,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.WorkerStateEvent;
@@ -51,6 +52,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitMenuButton;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -61,6 +64,7 @@ import javafx.util.Duration;
 import org.spc.health.epidemydesign.control.codeeditor.CodeEditor;
 import org.spc.health.epidemydesign.control.generatepane.GeneratePaneController;
 import org.spc.health.epidemydesign.control.infectioneditor.InfectionEditorController;
+import org.spc.health.epidemydesign.control.stateeditor.StateEditorController;
 import org.spc.health.epidemydesign.task.GenerationTask;
 
 /**
@@ -84,6 +88,8 @@ public final class MainUIController extends ControllerBase implements Initializa
     private SplitMenuButton loadCSSButton;
     @FXML
     private SplitMenuButton loadFXMLButton;
+    @FXML
+    private StateEditorController stateEditorController;
     @FXML
     private InfectionEditorController infectionEditorController;
     @FXML
@@ -136,13 +142,8 @@ public final class MainUIController extends ControllerBase implements Initializa
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        infections.addListener((final ListChangeListener.Change<? extends Infection> change) -> {
-            final List<Infection> comboList = new LinkedList<>();
-            comboList.add(null);
-            comboList.addAll(infections);
-            previewCombo.getItems().setAll(comboList);
-            comboList.clear();
-        });
+        infections.addListener(infectionsListChangeListener);
+        states.addListener(statesListChangeListener);
         try {
             reloadStatesFromTemplate();
             reloadInfectionsFromTemplate();
@@ -150,12 +151,33 @@ public final class MainUIController extends ControllerBase implements Initializa
             LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
         //
+        stateEditorController.applicationProperty().bind(applicationProperty());
+        stateEditorController.setStates(states);
+        stateEditorController.setOnSave((final ActionEvent actionEvent) -> saveStatesMayBe());
+        stateEditorController.setOnLoad((final ActionEvent actionEvent) -> importStatesMayBe());
+        stateEditorController.setOnDefault((final ActionEvent actionEvent) -> {
+            try {
+                exportStatesFromSource();
+                reloadStatesFromTemplate();
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        });
+        stateEditorController.setOnSelectFile((final File file) -> {
+            try {
+                clearStates();
+                reloadStatesFromFile(file);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        });
+        //
         infectionEditorController.applicationProperty().bind(applicationProperty());
         infectionEditorController.setInfections(infections);
         infectionEditorController.setStates(states);
-        infectionEditorController.setOnInfectionSave((final ActionEvent actionEvent) -> saveInfectionsMayBe());
-        infectionEditorController.setOnInfectionLoad((final ActionEvent actionEvent) -> importInfectionsMayBe());
-        infectionEditorController.setOnInfectionDefault((final ActionEvent actionEvent) -> {
+        infectionEditorController.setOnSave((final ActionEvent actionEvent) -> saveInfectionsMayBe());
+        infectionEditorController.setOnLoad((final ActionEvent actionEvent) -> importInfectionsMayBe());
+        infectionEditorController.setOnDefault((final ActionEvent actionEvent) -> {
             try {
                 exportInfectionsFromSource();
                 reloadInfectionsFromTemplate();
@@ -163,7 +185,7 @@ public final class MainUIController extends ControllerBase implements Initializa
                 LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
-        infectionEditorController.setOnInfectionFile((final File file) -> {
+        infectionEditorController.setOnSelectFile((final File file) -> {
             try {
                 clearInfections();
                 reloadInfectionsFromFile(file);
@@ -172,6 +194,8 @@ public final class MainUIController extends ControllerBase implements Initializa
             }
         });
         //
+        //
+        generatePaneController.applicationProperty().bind(applicationProperty());
         generatePaneController.setOnGenerate((final ActionEvent actionEvent) -> generateOutput());
         //
         previewCombo.valueProperty().addListener(previewSelectionInvalidationListener);
@@ -226,6 +250,25 @@ public final class MainUIController extends ControllerBase implements Initializa
     }
 
     ////////////////////////////////////////////////////////////////////////////
+    private final ListChangeListener<Infection> infectionsListChangeListener = (final Change<? extends Infection> change) -> {
+        final List<Infection> comboList = new LinkedList<>();
+        comboList.add(null);
+        comboList.addAll(infections);
+        previewCombo.getItems().setAll(comboList);
+        comboList.clear();
+    };
+
+    private final ListChangeListener<State> statesListChangeListener = (final Change<? extends State> change) -> {
+        Platform.runLater(() -> {
+            try {
+                saveStatesToTemplate();
+                populatePreviewPane();
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        });
+    };
+
     /**
      * Called whenever selection in the preview combo changes.
      */
@@ -269,10 +312,23 @@ public final class MainUIController extends ControllerBase implements Initializa
                     node1.getStylesheets().add(tempCSSURL.toExternalForm());
                     final PseudoClass pseudoClass = PseudoClass.getPseudoClass(state.getName());
                     node1.pseudoClassStateChanged(pseudoClass, true);
-                    final Group group = new Group(node1);
-                    final StackPane pane = new StackPane(group);
-                    VBox.setVgrow(pane, Priority.ALWAYS);
-                    previewPane.getChildren().add(pane);
+                    final Group stateGroup = new Group(node1);
+                    stateGroup.setId("stateGroup_" + state); // NOI18N.
+                    StackPane statePreviewPane = new StackPane(stateGroup);
+                    statePreviewPane.getStyleClass().add("preview-pane"); // NOI18N.
+                    final Label stateLabel = new Label();
+                    stateLabel.setId("stateLabel_" + state); // NOI18N.
+                    stateLabel.getStyleClass().add("state-label");
+                    stateLabel.setText(state.getName());
+                    final HBox stateActionBar = new HBox();
+                    stateActionBar.getStyleClass().add("action-bar"); // NOI18N.
+                    stateActionBar.getChildren().add(stateLabel);
+                    final BorderPane previewThumbnail = new BorderPane();
+                    previewThumbnail.getStyleClass().add("preview-thumbnail"); // NOI18N.
+                    previewThumbnail.setTop(stateActionBar);
+                    previewThumbnail.setCenter(statePreviewPane);
+                    VBox.setVgrow(previewThumbnail, Priority.ALWAYS);
+                    previewPane.getChildren().add(previewThumbnail);
                 } catch (IOException ex) {
                     LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -287,7 +343,11 @@ public final class MainUIController extends ControllerBase implements Initializa
             final Infection infection = previewCombo.getValue();
             final String text = (infection == null) ? I18N.getString("LABEL_LABEL") : infection.getName(); // NOI18N.
             final Set<Node> allLabels = previewPane.lookupAll(".label"); // NOI18N.
-            allLabels.stream().map((Node node) -> (Label) node).forEach((Label label) -> label.setText(text));
+            allLabels.stream().map((Node node) -> (Label) node).forEach((Label label) -> {
+                if (!label.getId().contains("stateLabel")) {
+                    label.setText(text);
+                }
+            });
         });
     }
 
@@ -366,26 +426,6 @@ public final class MainUIController extends ControllerBase implements Initializa
     @FXML
     private void handleLoadFXMLButton(final ActionEvent actionEvent) {
         importTemplateMayBe(fxmlEditor, "fxml", loadFXMLButton); // NOI18N.
-    }
-
-    @FXML
-    private void handleAddInfectionsButton(final ActionEvent actionEvent) {
-    }
-
-    @FXML
-    private void handleDeleteInfectionsButton(final ActionEvent actionEvent) {
-    }
-
-    @FXML
-    private void handleSaveInfectionsButton(final ActionEvent actionEvent) {
-    }
-
-    @FXML
-    private void handleLoadInfectionsButton(final ActionEvent actionEvent) {
-    }
-
-    @FXML
-    private void handleInfectionsDefaultButton(final ActionEvent actionEvent) {
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -546,18 +586,28 @@ public final class MainUIController extends ControllerBase implements Initializa
         }
     }
 
+    private void clearStates() {
+        states.clear();
+    }
+
     private void reloadStatesFromTemplate() throws IOException {
+        clearStates();
+        reloadStatesFromFile(statesFile);
+    }
+
+    private void reloadStatesFromFile(final File file) throws IOException {
         final Properties fileContent = new Properties();
-        try (final FileInputStream input = new FileInputStream(statesFile)) {
+        try (final FileInputStream input = new FileInputStream(file)) {
             fileContent.load(input);
         }
         final List<String> values = new ArrayList<>(fileContent.stringPropertyNames());
         Collections.sort(values);
-        values.stream().map((value) -> {
+        values.stream().map((final String value) -> {
             final String color = fileContent.getProperty(value);
             final State state = initializeState(value, color);
             return state;
         }).forEach((state) -> states.add(state));
+        Collections.sort(states);
     }
 
     private State initializeState(final String name, final String colorName) {
@@ -612,6 +662,8 @@ public final class MainUIController extends ControllerBase implements Initializa
             infection.getStates().addListener(invalidationStateListChangeListener);
             infections.add(infection);
         });
+        Collections.sort(states);
+        Collections.sort(infections);
     }
 
     /**
@@ -656,13 +708,64 @@ public final class MainUIController extends ControllerBase implements Initializa
         }
     }
 
+    private void importStatesMayBe() {
+        final FileChooser dialog = prepareInputFileDialog("states", "properties");
+        final File file = dialog.showOpenDialog(loadCSSButton.getScene().getWindow());
+        if (file != null) {
+            Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
+            try {
+                clearStates();
+                reloadStatesFromFile(file);
+                if (!stateEditorController.getRecentFiles().contains(file)) {
+                    stateEditorController.getRecentFiles().add(file);
+                }
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private void saveStatesMayBe() {
+        final FileChooser dialog = prepareInputFileDialog("states", "properties"); // NOI18N.
+        final File file = dialog.showSaveDialog(loadCSSButton.getScene().getWindow());
+        if (file != null) {
+            Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
+            try {
+                saveStatesToFile(file);
+            } catch (IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private void saveStatesToTemplate() throws IOException {
+        saveStatesToFile(statesFile);
+    }
+
+    private void saveStatesToFile(final File file) throws IOException {
+        try (final PrintWriter writer = new PrintWriter(file, ENCODING)) {
+            states.forEach((State state) -> {
+                final StringBuilder line = new StringBuilder();
+                final String name = state.getName();
+                line.append(name);
+                line.append("="); // NOI18N.
+                final Color color = state.getColor();
+                if (color != null) {
+                    final String webColor = String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255), (int) (color.getBlue() * 255)); // NOI18N.
+                    line.append(webColor);
+                }
+                writer.println(line.toString().trim());
+            });
+        }
+    }
+
     private void importInfectionsMayBe() {
         final FileChooser dialog = prepareInputFileDialog("infections", "properties");
         final File file = dialog.showOpenDialog(loadCSSButton.getScene().getWindow());
         if (file != null) {
             Settings.getPrefs().put("last.input.folder", file.getParent()); // NOI18N.
             try {
-                infections.clear();
+                clearInfections();
                 reloadInfectionsFromFile(file);
                 if (!infectionEditorController.getRecentFiles().contains(file)) {
                     infectionEditorController.getRecentFiles().add(file);

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+Copyright - Secretariat of the Pacific Community
+Droit de copie - Secrétariat Général de la Communauté du Pacifique
+http://www.spc.int/
+-->
+
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
@@ -8,7 +14,7 @@
 
 <HBox id="GridPane" styleClass="action-bar" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.control.generatepane.GeneratePaneController">
    <children>
-      <Label styleClass="title" text="%EXPORT_LABEL" GridPane.columnSpan="2147483647" />
+      <Label styleClass="title-label" text="%EXPORT_LABEL" GridPane.columnSpan="2147483647" />
       <Label text="%TARGET_FOLDER_LABEL" GridPane.rowIndex="1" />
       <ComboBox fx:id="targetComboBox" editable="true" maxWidth="1.7976931348623157E308" prefWidth="400.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
       <Button fx:id="targetBrowseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleTargetBrowseButton" text="%BROWSE_LABEL" GridPane.columnIndex="3" GridPane.rowIndex="1" />

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -88,9 +89,6 @@ public final class InfectionEditorController extends ControllerBase implements I
         infectionFileColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         infectionFileColumn.setEditable(true);
         //
-        populateStatesColumns();
-        //
-        //
         addInfectionsButton.disableProperty().bind(Bindings.isEmpty(infectionsField.textProperty()));
         deleteInfectionsButton.disableProperty().bind(Bindings.isEmpty(infectionTable.getSelectionModel().getSelectedCells()));
     }
@@ -106,8 +104,24 @@ public final class InfectionEditorController extends ControllerBase implements I
      * Called whenever the states list changes.
      */
     private final ListChangeListener<State> statesListChangeListener = (final Change<? extends State> change) -> {
-        clearStatesColumns();
-        populateStatesColumns();
+        while (change.next()) {
+            // Remove states.
+            change.getRemoved().forEach((final State state) -> {
+                final List<TableColumn> toRemove = infectionTable.getColumns().stream()
+                        .filter((final TableColumn tableColumn) -> state.equals(tableColumn.getProperties().get("state"))) // NOI18N.
+                        .collect(Collectors.toList());
+                toRemove.forEach((final TableColumn tableColumn) -> {
+                    infectionTable.getColumns().remove(tableColumn);
+                    tableColumn.getProperties().remove("state"); // NOI18N.
+                });
+                toRemove.clear();
+            });
+            // Add states.
+            change.getAddedSubList().forEach((final State state) -> {
+                final TableColumn<Infection, Boolean> tableColumn = createTableColumnForState(state);
+                infectionTable.getColumns().add(tableColumn);
+            });
+        }
     };
 
     /**
@@ -117,21 +131,23 @@ public final class InfectionEditorController extends ControllerBase implements I
         while (change.next()) {
             // Remove files.
             change.getRemoved().forEach((final File file) -> {
-                loadInfectionsButton.getItems().stream()
+                final List<MenuItem> toRemove = loadInfectionsButton.getItems().stream()
                         .filter((final MenuItem menuItem) -> file.equals(menuItem.getProperties().get("file"))) // NOI18N.
-                        .forEach((final MenuItem menuItem) -> {
-                            loadInfectionsButton.getItems().remove(menuItem);
-                            menuItem.getProperties().remove("file"); // NOI18N.
-                            menuItem.setOnAction(null);
-                        });
+                        .collect(Collectors.toList());
+                toRemove.forEach((final MenuItem menuItem) -> {
+                    loadInfectionsButton.getItems().remove(menuItem);
+                    menuItem.getProperties().remove("file"); // NOI18N.
+                    menuItem.setOnAction(null);
+                });
+                toRemove.clear();
             });
             // Add files.
             change.getAddedSubList().forEach((final File file) -> {
                 final MenuItem fileMenuItem = new MenuItem(file.getAbsolutePath());
                 fileMenuItem.getProperties().put("file", file); // NOI18N.
                 fileMenuItem.setOnAction((final ActionEvent actionEvent) -> {
-                    final Optional<Consumer<File>> onInfectionFile = Optional.ofNullable(getOnInfectionFile());
-                    onInfectionFile.ifPresent((final Consumer<File> consumer) -> consumer.accept(file));
+                    final Optional<Consumer<File>> onSelectFile = Optional.ofNullable(getOnSelectFile());
+                    onSelectFile.ifPresent((final Consumer<File> consumer) -> consumer.accept(file));
                 });
                 loadInfectionsButton.getItems().add(fileMenuItem);
             });
@@ -172,8 +188,8 @@ public final class InfectionEditorController extends ControllerBase implements I
      */
     @FXML
     private void handleSaveInfectionsButton(final ActionEvent actionEvent) {
-        final Optional<EventHandler<ActionEvent>> onInfectionSave = Optional.ofNullable(getOnInfectionSave());
-        onInfectionSave.ifPresent((final EventHandler<ActionEvent> eventHandler) -> eventHandler.handle(new ActionEvent(this, null)));
+        final Optional<EventHandler<ActionEvent>> onSave = Optional.ofNullable(getOnSave());
+        onSave.ifPresent((final EventHandler<ActionEvent> eventHandler) -> eventHandler.handle(new ActionEvent(this, null)));
     }
 
     /**
@@ -181,8 +197,8 @@ public final class InfectionEditorController extends ControllerBase implements I
      */
     @FXML
     private void handleLoadInfectionsButton(final ActionEvent actionEvent) {
-        final Optional<EventHandler<ActionEvent>> onInfectionLoad = Optional.ofNullable(getOnInfectionLoad());
-        onInfectionLoad.ifPresent((final EventHandler<ActionEvent> eventHandler) -> eventHandler.handle(new ActionEvent(this, null)));
+        final Optional<EventHandler<ActionEvent>> onLoad = Optional.ofNullable(getOnLoad());
+        onLoad.ifPresent((final EventHandler<ActionEvent> eventHandler) -> eventHandler.handle(new ActionEvent(this, null)));
     }
 
     /**
@@ -190,43 +206,34 @@ public final class InfectionEditorController extends ControllerBase implements I
      */
     @FXML
     private void handleInfectionsDefaultButton(final ActionEvent actionEvent) {
-        final Optional<EventHandler<ActionEvent>> onInfectionDefault = Optional.ofNullable(getOnInfectionDefault());
-        onInfectionDefault.ifPresent((final EventHandler<ActionEvent> eventHandler) -> eventHandler.handle(new ActionEvent(this, null)));
+        final Optional<EventHandler<ActionEvent>> onDefault = Optional.ofNullable(getOnDefault());
+        onDefault.ifPresent((final EventHandler<ActionEvent> eventHandler) -> eventHandler.handle(new ActionEvent(this, null)));
     }
 
     ////////////////////////////////////////////////////////////////////////////
     /**
-     * Clear states columns.
+     * Create a new columns in the table for a given state.
+     * @param state The state.
      */
-    private void clearStatesColumns() {
-        infectionTable.getColumns().stream()
-                .filter((TableColumn<Infection, ?> column) -> (column != infectionNameColumn) && (column != infectionFileColumn))
-                .forEach((TableColumn<Infection, ?> column) -> infectionTable.getColumns().remove(column));
-    }
-
-    /**
-     * After loading infections, create new columns in the table for each state.
-     */
-    private void populateStatesColumns() {
-        states.forEach((final State state) -> {
-            final TableColumn<Infection, Boolean> stateColumn = new TableColumn<>(state.getName());
-            stateColumn.setEditable(true);
-            stateColumn.setCellValueFactory((TableColumn.CellDataFeatures<Infection, Boolean> p) -> {
-                final Infection infection = p.getValue();
-                final boolean activated = infection.getStates().contains(state);
-                final BooleanProperty property = new SimpleBooleanProperty(activated);
-                property.addListener((ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) -> {
-                    if (newValue) {
-                        infection.getStates().add(state);
-                    } else {
-                        infection.getStates().remove(state);
-                    }
-                });
-                return property;
+    private TableColumn<Infection, Boolean> createTableColumnForState(final State state) {
+        final TableColumn<Infection, Boolean> result = new TableColumn<>(state.getName());
+        result.getProperties().put("state", state); // NOI18N.
+        result.setEditable(true);
+        result.setCellValueFactory((TableColumn.CellDataFeatures<Infection, Boolean> p) -> {
+            final Infection infection = p.getValue();
+            final boolean activated = infection.getStates().contains(state);
+            final BooleanProperty property = new SimpleBooleanProperty(activated);
+            property.addListener((ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) -> {
+                if (newValue) {
+                    infection.getStates().add(state);
+                } else {
+                    infection.getStates().remove(state);
+                }
             });
-            stateColumn.setCellFactory(CheckBoxTableCell.forTableColumn(stateColumn));
-            infectionTable.getColumns().add(stateColumn);
+            return property;
         });
+        result.setCellFactory(CheckBoxTableCell.forTableColumn(result));
+        return result;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -284,68 +291,68 @@ public final class InfectionEditorController extends ControllerBase implements I
     /**
      * What to do when saving infection definitions.
      */
-    private final ObjectProperty<EventHandler<ActionEvent>> onInfectionSave = new SimpleObjectProperty<>(this, "onInfectionSave"); // NOI18N.
+    private final ObjectProperty<EventHandler<ActionEvent>> onSave = new SimpleObjectProperty<>(this, "onSave"); // NOI18N.
 
-    public final EventHandler<ActionEvent> getOnInfectionSave() {
-        return onInfectionSave.get();
+    public final EventHandler<ActionEvent> getOnSave() {
+        return onSave.get();
     }
 
-    public final void setOnInfectionSave(final EventHandler<ActionEvent> value) {
-        onInfectionSave.set(value);
+    public final void setOnSave(final EventHandler<ActionEvent> value) {
+        onSave.set(value);
     }
 
-    public final ObjectProperty<EventHandler<ActionEvent>> onInfectionSaveProperty() {
-        return onInfectionSave;
+    public final ObjectProperty<EventHandler<ActionEvent>> onSaveProperty() {
+        return onSave;
     }
 
     /**
      * What to do when loading infection definitions.
      */
-    private final ObjectProperty<EventHandler<ActionEvent>> onInfectionLoad = new SimpleObjectProperty<>(this, "onInfectionLoad"); // NOI18N.
+    private final ObjectProperty<EventHandler<ActionEvent>> onLoad = new SimpleObjectProperty<>(this, "onLoad"); // NOI18N.
 
-    public final EventHandler<ActionEvent> getOnInfectionLoad() {
-        return onInfectionLoad.get();
+    public final EventHandler<ActionEvent> getOnLoad() {
+        return onLoad.get();
     }
 
-    public final void setOnInfectionLoad(final EventHandler<ActionEvent> value) {
-        onInfectionLoad.set(value);
+    public final void setOnLoad(final EventHandler<ActionEvent> value) {
+        onLoad.set(value);
     }
 
-    public final ObjectProperty<EventHandler<ActionEvent>> onInfectionLoadProperty() {
-        return onInfectionLoad;
+    public final ObjectProperty<EventHandler<ActionEvent>> onLoadProperty() {
+        return onLoad;
     }
 
     /**
      * What to do when resetting infection definitions.
      */
-    private final ObjectProperty<EventHandler<ActionEvent>> onInfectionDefault = new SimpleObjectProperty<>(this, "onInfectionDefault"); // NOI18N.
+    private final ObjectProperty<EventHandler<ActionEvent>> onDefault = new SimpleObjectProperty<>(this, "onDefault"); // NOI18N.
 
-    public final EventHandler<ActionEvent> getOnInfectionDefault() {
-        return onInfectionDefault.get();
+    public final EventHandler<ActionEvent> getOnDefault() {
+        return onDefault.get();
     }
 
-    public final void setOnInfectionDefault(final EventHandler<ActionEvent> value) {
-        onInfectionDefault.set(value);
+    public final void setOnDefault(final EventHandler<ActionEvent> value) {
+        onDefault.set(value);
     }
 
-    public final ObjectProperty<EventHandler<ActionEvent>> onInfectionDefaultProperty() {
-        return onInfectionDefault;
+    public final ObjectProperty<EventHandler<ActionEvent>> onDefaultProperty() {
+        return onDefault;
     }
 
     /**
      * What to do when loading a specific infection definitions file.
      */
-    private final ObjectProperty<Consumer<File>> onInfectionFile = new SimpleObjectProperty<>(this, "onInfectionFile"); // NOI18N.
+    private final ObjectProperty<Consumer<File>> onSelectFile = new SimpleObjectProperty<>(this, "onSelectFile"); // NOI18N.
 
-    public final Consumer<File> getOnInfectionFile() {
-        return onInfectionFile.get();
+    public final Consumer<File> getOnSelectFile() {
+        return onSelectFile.get();
     }
 
-    public final void setOnInfectionFile(final Consumer<File> value) {
-        onInfectionFile.set(value);
+    public final void setOnSelectFile(final Consumer<File> value) {
+        onSelectFile.set(value);
     }
 
-    public final ObjectProperty<Consumer<File>> onInfectionFileProperty() {
-        return onInfectionFile;
+    public final ObjectProperty<Consumer<File>> onSelectFileProperty() {
+        return onSelectFile;
     }
 }

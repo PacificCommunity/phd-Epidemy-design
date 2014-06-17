@@ -6,6 +6,7 @@
 package org.spc.health.epidemydesign;
 
 import java.util.LinkedList;
+import java.util.Objects;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -33,6 +34,16 @@ public final class Infection implements Comparable<Infection> {
         id = name;
         setName(name);
         setFileName((fileName == null || fileName.trim().isEmpty()) ? name.replaceAll("\\?", "U").replaceAll("\\s", "") : fileName); // NOI18N.
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof Infection) ? id.equals(((Infection) obj).id) : false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id);
     }
 
     @Override

@@ -26,7 +26,7 @@ http://www.spc.int/
                                  <children>
                                     <HBox alignment="CENTER_LEFT" styleClass="action-bar">
                                        <children>
-                                          <Label styleClass="title" text="%CSS_LABEL" />
+                                          <Label styleClass="title-label" text="%CSS_LABEL" />
                                           <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%CSS_REFERENCE_GUIDE_LABEL" />
                                           <Region fx:id="cssBarSpacer" HBox.hgrow="ALWAYS" />
                                           <Button fx:id="saveCSSButton" mnemonicParsing="false" onAction="#handleSaveCSSButton" text="%SAVE_LABEL" />
@@ -48,7 +48,7 @@ http://www.spc.int/
                                  <children>
                                     <HBox alignment="CENTER_LEFT" styleClass="action-bar">
                                        <children>
-                                          <Label styleClass="title" text="%FXML_LABEL" />
+                                          <Label styleClass="title-label" text="%FXML_LABEL" />
                                           <Region fx:id="fxmlBarSpacer" HBox.hgrow="ALWAYS" />
                                           <Button fx:id="saveFXMLButton" mnemonicParsing="false" onAction="#handleSaveFXMLButton" text="%SAVE_LABEL" />
                                           <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" onAction="#handleLoadFXMLButton" text="%LOAD_LABEL" />
@@ -67,7 +67,7 @@ http://www.spc.int/
                   </TabPane>
                   <SplitPane dividerPositions="0.33" orientation="VERTICAL" prefHeight="160.0" prefWidth="200.0">
                     <items>
-                        <fx:include source="control/stateeditor/StateEditor.fxml" />
+                        <fx:include fx:id="stateEditor" source="control/stateeditor/StateEditor.fxml" />
                         <fx:include fx:id="infectionEditor" source="control/infectioneditor/InfectionEditor.fxml" />
                     </items>
                   </SplitPane>
@@ -77,7 +77,7 @@ http://www.spc.int/
                <children>
                   <HBox styleClass="action-bar" VBox.vgrow="NEVER">
                      <children>
-                        <Label styleClass="title" text="%PREVIEW_LABEL" />
+                        <Label styleClass="title-label" text="%PREVIEW_LABEL" />
                         <ComboBox fx:id="previewCombo" prefWidth="100.0" />
                         <Region fx:id="previewSpacer" HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#handleRefreshButton" text="%REFRESH_LABEL" />
@@ -88,7 +88,7 @@ http://www.spc.int/
                         </Button>
                      </children>
                   </HBox>
-                  <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" styleClass="preview-pane" VBox.vgrow="ALWAYS" />
+                  <VBox fx:id="previewPane" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
         </items>

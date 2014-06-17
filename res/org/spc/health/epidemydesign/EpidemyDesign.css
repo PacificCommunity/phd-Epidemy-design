@@ -29,7 +29,12 @@
 .preview-pane {
     -fx-background-image: url("transparency.png");
 }
-.title {
+.preview-thumbnail {
+    -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
+    -fx-background-insets: 0px, 1px 1px 1px 0px;
+    -fx-padding: 1px 1px 1px 0px;
+}
+.title-label {
     -fx-font-size: 1.2em;
     -fx-font-weight: bold;
     -fx-text-fill: gray;
@@ -39,4 +44,8 @@
     -fx-font-weight: bold;
     -fx-font-size: 1.5em;
     -fx-base: firebrick;
+}
+.state-label {
+    -fx-font-size: 1.0em;    
+    -fx-font-weight: bold;
 }
