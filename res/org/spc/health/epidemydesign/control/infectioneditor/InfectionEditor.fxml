@@ -9,7 +9,7 @@
       <HBox styleClass="action-bar" VBox.vgrow="NEVER">
          <children>
             <Label fx:id="infectionsLabel" styleClass="title" text="%INFECTIONS_LABEL" />
-            <TextField fx:id="infectionsField" />
+            <TextField fx:id="infectionsField" prefWidth="75.0" />
             <Button fx:id="addInfectionsButton" mnemonicParsing="false" onAction="#handleAddInfectionsButton" text="%ADD_LABEL" />
             <Separator orientation="VERTICAL" />
             <Button fx:id="deleteInfectionsButton" mnemonicParsing="false" onAction="#handleDeleteInfectionsButton" text="%DELETE_LABEL" />
