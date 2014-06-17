@@ -35,7 +35,7 @@ public final class EpidemyDesign extends Application {
         final MainUIController mainUIController = fxmlLoader.getController();
         mainUIController.setApplication(this);
         final StackPane root = new StackPane(mainUI);
-        final Scene scene = new Scene(root, 1200, 800);
+        final Scene scene = new Scene(root);
         final URL cssURL = getClass().getResource("EpidemyDesign.css"); // NOI18N.
         scene.getStylesheets().add(cssURL.toExternalForm());
         primaryStage.setTitle(String.format("%s %s", I18N.getString("APP_TITLE"), Settings.getVersion())); // NOI18N.
