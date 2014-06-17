@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox id="GridPane" styleClass="action-bar" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.spc.health.epidemydesign.control.generatepane.GeneratePaneController">
+   <children>
+      <Label styleClass="title" text="%EXPORT_LABEL" GridPane.columnSpan="2147483647" />
+      <Label text="%TARGET_FOLDER_LABEL" GridPane.rowIndex="1" />
+      <ComboBox fx:id="targetComboBox" editable="true" maxWidth="1.7976931348623157E308" prefWidth="400.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+      <Button fx:id="targetBrowseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleTargetBrowseButton" text="%BROWSE_LABEL" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+      <Pane HBox.hgrow="ALWAYS" />
+      <ProgressBar fx:id="generateProgressBar" maxWidth="1.7976931348623157E308" prefWidth="200.0" progress="0.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" HBox.hgrow="NEVER" />
+      <Button fx:id="generateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGenerateButton" styleClass="generate-button" text="%GENERATE_LABEL" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+   </children>
+</HBox>
