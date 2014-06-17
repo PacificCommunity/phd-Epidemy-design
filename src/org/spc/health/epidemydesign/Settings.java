@@ -17,7 +17,7 @@ import java.util.prefs.Preferences;
  * Allows to access user preferences.
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
-final class Settings {
+public final class Settings {
 
     private static final Preferences PREFS = Preferences.userNodeForPackage(Settings.class);
     private static final Properties VERSION_INFO = new Properties();
