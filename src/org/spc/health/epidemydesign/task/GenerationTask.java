@@ -1,8 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/***********************************************************************
+ *  Copyright - Secretariat of the Pacific Community                   *
+ *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
+ *  http://www.spc.int/                                                *
+ ***********************************************************************/
 package org.spc.health.epidemydesign.task;
 
 import java.awt.image.BufferedImage;
@@ -27,8 +27,8 @@ import javax.imageio.ImageIO;
 import org.spc.health.epidemydesign.Infection;
 
 /**
- *
- * @author fabriceb
+ * Task that generates images.
+ * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 public class GenerationTask extends Task<Void> {
 

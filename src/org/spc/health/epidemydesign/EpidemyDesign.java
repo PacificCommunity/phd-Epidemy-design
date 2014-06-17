@@ -7,7 +7,6 @@ package org.spc.health.epidemydesign;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
