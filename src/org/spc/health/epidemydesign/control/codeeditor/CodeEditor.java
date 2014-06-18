@@ -209,7 +209,10 @@ public class CodeEditor extends Region {
         text.ifPresent((final String t) -> {
             try {
                 isEditing = true;
-                final String content = t.replaceAll("\n", "\\\\n"); // NOI18N.
+                 final String content = t
+                        .replaceAll("\\\\", "\\\\\\\\") // NOI18N.
+                        .replaceAll("\n", "\\\\n") // NOI18N.
+                        .replaceAll("'", "\\\\'"); // NOI18N.
                 final String command = String.format("setText('%s');", content); // NOI18N.
                 webView.getEngine().executeScript(command);
             } finally {
