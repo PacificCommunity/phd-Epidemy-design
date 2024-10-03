@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact name="epidemy-design:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/epidemy_design_jar</output-path>
+    <root id="root">
+      <element id="archive" name="epidemy-design.jar">
+        <element id="module-output" name="epidemy-design" />
+      </element>
+    </root>
+  </artifact>
+</component>
