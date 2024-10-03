@@ -384,9 +384,10 @@ public final class MainUIController extends ControllerBase implements Initializa
     private void handleCSSLink(final ActionEvent actionEvent) {
         Optional.ofNullable(getApplication())
                 .ifPresent(app -> {
-                    // @todo get URL from properties.
-                    final String url = "http://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html";
-                    app.getHostServices().showDocument(url);
+                    final var url = I18N.getString("css-ref-guide.link", ""); // NOI18N.
+                    if (!url.isBlank()) {
+                        app.getHostServices().showDocument(url);
+                    }
                 });
     }
 
