@@ -269,7 +269,7 @@ public class CodeEditor extends Region {
     }
 
     /**
-     * The bridge class that is provided to JavaScript for bidirectionnal dialog.
+     * The bridge class that is provided to JavaScript for bidirectional dialog.
      * <br/>Had to be public to avoid some exceptions from being thrown.
      *
      * @author Fabrice Bouyé (fabriceb@spc.int)
