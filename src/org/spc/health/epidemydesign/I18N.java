@@ -1,8 +1,8 @@
-/***********************************************************************
- *  Copyright - Secretariat of the Pacific Community                   *
- *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
- *  http://www.spc.int/                                                *
- ***********************************************************************/
+/*
+ Copyright - Pacific Community
+ Droit de copie - Communauté du Pacifique
+ http://www.spc.int/
+*/
 package org.spc.health.epidemydesign;
 
 import java.util.MissingResourceException;
@@ -10,7 +10,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 /**
- * Allows to retrieve I18N text..
+ * Allows retrieving I18N text..
  * @author Fabrice Bouyé (fabriceb@spc.int)
  */
 final class I18N {

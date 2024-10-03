@@ -1,8 +1,8 @@
-/***********************************************************************
- *  Copyright - Secretariat of the Pacific Community                   *
- *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
- *  http://www.spc.int/                                                *
- ***********************************************************************/
+/*
+ Copyright - Pacific Community
+ Droit de copie - Communauté du Pacifique
+ http://www.spc.int/
+*/
 package org.spc.health.epidemydesign;
 
 import javafx.application.Application;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright - Secretariat of the Pacific Community
-Droit de copie - Secrétariat Général de la Communauté du Pacifique
+Copyright - Pacific Community
+Droit de copie - Communauté du Pacifique
 http://www.spc.int/
 -->
 
@@ -17,17 +17,17 @@ http://www.spc.int/
    <children>
       <HBox styleClass="action-bar">
          <children>
-            <Label fx:id="statesLabel" styleClass="title-label" text="%STATES_LABEL" />
+            <Label fx:id="statesLabel" styleClass="title-label" text="%stages.label" />
             <TextField fx:id="statesField" prefWidth="75.0" />
-            <Button fx:id="addStatesButton" onAction="#handleStatesAddButton" mnemonicParsing="false" text="%ADD_LABEL" />
+            <Button fx:id="addStatesButton" onAction="#handleStatesAddButton" mnemonicParsing="false" text="%add.label" />
             <Separator orientation="VERTICAL" />
-            <Button fx:id="deleteStatesButton" onAction="#handleStatesDeleteButton" mnemonicParsing="false" text="%DELETE_LABEL" />
+            <Button fx:id="deleteStatesButton" onAction="#handleStatesDeleteButton" mnemonicParsing="false" text="%delete.label" />
             <Pane fx:id="filler" HBox.hgrow="ALWAYS" />
-            <Button fx:id="saveStatesButton" onAction="#handleStatesSaveButton" mnemonicParsing="false" text="%SAVE_LABEL" />
-            <SplitMenuButton fx:id="loadStatesButton" onAction="#handleStatesLoadButton" mnemonicParsing="false" text="%LOAD_LABEL" />
-            <Button fx:id="resetStatesButton" mnemonicParsing="false" onAction="#handleStatesDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+            <Button fx:id="saveStatesButton" onAction="#handleStatesSaveButton" mnemonicParsing="false" text="%save-dots.label" />
+            <SplitMenuButton fx:id="loadStatesButton" onAction="#handleStatesLoadButton" mnemonicParsing="false" text="%load-dots.label" />
+            <Button fx:id="resetStatesButton" mnemonicParsing="false" onAction="#handleStatesDefaultButton" text="%reset-to-default.label">
                <tooltip>
-                  <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                  <Tooltip text="%reset-to-default.tip" />
                </tooltip>
             </Button>
          </children>

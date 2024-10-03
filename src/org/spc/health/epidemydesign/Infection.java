@@ -1,8 +1,8 @@
-/***********************************************************************
- *  Copyright - Secretariat of the Pacific Community                   *
- *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
- *  http://www.spc.int/                                                *
- ***********************************************************************/
+/*
+ Copyright - Pacific Community
+ Droit de copie - Communauté du Pacifique
+ http://www.spc.int/
+*/
 package org.spc.health.epidemydesign;
 
 import java.util.LinkedList;
@@ -28,17 +28,18 @@ public final class Infection implements Comparable<Infection> {
      * @throws IllegalArgumentException If {@code} name was {@code null}.
      */
     public Infection(final String name, final String fileName) throws IllegalArgumentException {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("name cannot be null or empty.");
+        Objects.requireNonNull(name);
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("name cannot be empty.");
         }
         id = name;
         setName(name);
-        setFileName((fileName == null || fileName.trim().isEmpty()) ? name.replaceAll("\\?", "U").replaceAll("\\s", "") : fileName); // NOI18N.
+        setFileName(Objects.isNull(fileName) || fileName.isBlank() ? name.replaceAll("\\?", "U").replaceAll("\\s", "") : fileName); // NOI18N.
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof Infection) ? id.equals(((Infection) obj).id) : false;
+    public boolean equals(final Object obj) {
+        return obj instanceof Infection infection && id.equals(infection.id);
     }
 
     @Override
@@ -52,21 +53,21 @@ public final class Infection implements Comparable<Infection> {
     }
 
     @Override
-    public int compareTo(Infection otherInfection) {
+    public int compareTo(final Infection otherInfection) {
         return id.compareTo(otherInfection.id);
     }
     ////////////////////////////////////////////////////////////////////////////
     private final StringProperty name = new SimpleStringProperty(this, "name"); // NOI18N.
 
-    public final String getName() {
+    public String getName() {
         return name.get();
     }
 
-    public final void setName(String value) {
+    public void setName(String value) {
         name.set(value);
     }
 
-    public final StringProperty nameProperty() {
+    public StringProperty nameProperty() {
         return name;
     }
 
@@ -76,11 +77,11 @@ public final class Infection implements Comparable<Infection> {
         return fileName.get();
     }
 
-    public final void setFileName(final String value) {
+    public void setFileName(final String value) {
         fileName.set(value);
     }
 
-    public final StringProperty fileNameProperty() {
+    public StringProperty fileNameProperty() {
         return fileName;
     }
 

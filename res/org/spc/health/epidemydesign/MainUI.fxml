@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright - Secretariat of the Pacific Community
-Droit de copie - Secrétariat Général de la Communauté du Pacifique
+Copyright - Pacific Community
+Droit de copie - Communauté du Pacifique
 http://www.spc.int/
 -->
 
@@ -20,20 +20,20 @@ http://www.spc.int/
               <items>
                   <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
                     <tabs>
-                      <Tab text="%STYLE_LABEL">
+                      <Tab text="%style.label">
                            <content>
                               <VBox fx:id="cssContent" prefHeight="200.0" prefWidth="100.0">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" styleClass="action-bar">
                                        <children>
-                                          <Label styleClass="title-label" text="%CSS_LABEL" />
-                                          <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%CSS_REFERENCE_GUIDE_LABEL" />
+                                          <Label styleClass="title-label" text="%css.label" />
+                                          <Hyperlink fx:id="cssLink" onAction="#handleCSSLink" text="%ccs.reference.guide.label" />
                                           <Region fx:id="cssBarSpacer" HBox.hgrow="ALWAYS" />
-                                          <Button fx:id="saveCSSButton" mnemonicParsing="false" onAction="#handleSaveCSSButton" text="%SAVE_LABEL" />
-                                          <SplitMenuButton fx:id="loadCSSButton" mnemonicParsing="false" onAction="#handleLoadCSSButton" text="%LOAD_LABEL" />
-                                          <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                                          <Button fx:id="saveCSSButton" mnemonicParsing="false" onAction="#handleSaveCSSButton" text="%save-dots.label" />
+                                          <SplitMenuButton fx:id="loadCSSButton" mnemonicParsing="false" onAction="#handleLoadCSSButton" text="%load-dots.label" />
+                                          <Button fx:id="defaultCSSButton" mnemonicParsing="false" onAction="#handleCSSDefaultButton" text="%reset-to-default.label">
                                              <tooltip>
-                                                <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                                                <Tooltip text="%reset-to-default.tip" />
                                              </tooltip>
                                           </Button>
                                        </children>
@@ -42,19 +42,19 @@ http://www.spc.int/
                               </VBox>
                            </content>
                       </Tab>
-                      <Tab text="%SHAPE_LABEL">
+                      <Tab text="%shape.label">
                            <content>
                               <VBox fx:id="fxmlContent" prefHeight="200.0" prefWidth="100.0">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" styleClass="action-bar">
                                        <children>
-                                          <Label styleClass="title-label" text="%FXML_LABEL" />
+                                          <Label styleClass="title-label" text="%fxml.label" />
                                           <Region fx:id="fxmlBarSpacer" HBox.hgrow="ALWAYS" />
-                                          <Button fx:id="saveFXMLButton" mnemonicParsing="false" onAction="#handleSaveFXMLButton" text="%SAVE_LABEL" />
-                                          <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" onAction="#handleLoadFXMLButton" text="%LOAD_LABEL" />
-                                          <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                                          <Button fx:id="saveFXMLButton" mnemonicParsing="false" onAction="#handleSaveFXMLButton" text="%save-dots.label" />
+                                          <SplitMenuButton fx:id="loadFXMLButton" mnemonicParsing="false" onAction="#handleLoadFXMLButton" text="%load-dots.label" />
+                                          <Button fx:id="fxmlDefaultButton" mnemonicParsing="false" onAction="#handleFXMLDefaultButton" text="%reset-to-default.label">
                                              <tooltip>
-                                                <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                                                <Tooltip text="%reset-to-default.tip" />
                                              </tooltip>
                                           </Button>
                                        </children>
@@ -77,13 +77,13 @@ http://www.spc.int/
                <children>
                   <HBox styleClass="action-bar" VBox.vgrow="NEVER">
                      <children>
-                        <Label styleClass="title-label" text="%PREVIEW_LABEL" />
+                        <Label styleClass="title-label" text="%preview.label" />
                         <ComboBox fx:id="previewCombo" prefWidth="100.0" />
                         <Region fx:id="previewSpacer" HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" onAction="#handleRefreshButton" text="%REFRESH_LABEL" />
-                        <Button mnemonicParsing="false" onAction="#handlePreviewDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+                        <Button mnemonicParsing="false" onAction="#handleRefreshButton" text="%refresh.label" />
+                        <Button mnemonicParsing="false" onAction="#handlePreviewDefaultButton" text="%reset-to-default.label">
                            <tooltip>
-                              <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                              <Tooltip text="%reset-to-default.tip" />
                            </tooltip>
                         </Button>
                      </children>

@@ -1,11 +1,13 @@
-/***********************************************************************
- *  Copyright - Secretariat of the Pacific Community                   *
- *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
- *  http://www.spc.int/                                                *
- ***********************************************************************/
+/*
+ Copyright - Pacific Community
+ Droit de copie - Communauté du Pacifique
+ http://www.spc.int/
+*/
 package org.spc.health.epidemydesign;
 
 import javafx.scene.control.ListCell;
+
+import java.util.Objects;
 
 /**
  * Displays infections in list and combo box.
@@ -14,12 +16,12 @@ import javafx.scene.control.ListCell;
 final class InfectionListCell extends ListCell<Infection> {
 
     @Override
-    protected void updateItem(Infection infection, boolean empty) {
+    protected void updateItem(final Infection infection, final boolean empty) {
         super.updateItem(infection, empty);
         textProperty().unbind();
         if (!empty) {
-            if (infection == null) {
-                final String text = I18N.getString("DEFAULT_VALUE_LABEL"); // NOI18N.
+            if (Objects.isNull(infection)) {
+                final var text = I18N.getString("default-value.label"); // NOI18N.
                 setText(text);
             } else {
                 textProperty().bind(infection.nameProperty());

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright - Secretariat of the Pacific Community
-Droit de copie - Secrétariat Général de la Communauté du Pacifique
+Copyright - Pacific Community
+Droit de copie - Communauté du Pacifique
 http://www.spc.int/
 -->
 
@@ -14,17 +14,17 @@ http://www.spc.int/
    <children>
       <HBox styleClass="action-bar" VBox.vgrow="NEVER">
          <children>
-            <Label fx:id="infectionsLabel" styleClass="title-label" text="%INFECTIONS_LABEL" />
+            <Label fx:id="infectionsLabel" styleClass="title-label" text="%infections.label" />
             <TextField fx:id="infectionsField" prefWidth="75.0" />
-            <Button fx:id="addInfectionsButton" mnemonicParsing="false" onAction="#handleAddInfectionsButton" text="%ADD_LABEL" />
+            <Button fx:id="addInfectionsButton" mnemonicParsing="false" onAction="#handleAddInfectionsButton" text="%add.label" />
             <Separator orientation="VERTICAL" />
-            <Button fx:id="deleteInfectionsButton" mnemonicParsing="false" onAction="#handleDeleteInfectionsButton" text="%DELETE_LABEL" />
+            <Button fx:id="deleteInfectionsButton" mnemonicParsing="false" onAction="#handleDeleteInfectionsButton" text="%delete.label" />
             <Region fx:id="infectionSpacer" HBox.hgrow="ALWAYS" />
-            <Button fx:id="saveInfectionsButton" mnemonicParsing="false" onAction="#handleSaveInfectionsButton" text="%SAVE_LABEL" />
-            <SplitMenuButton fx:id="loadInfectionsButton" mnemonicParsing="false" onAction="#handleLoadInfectionsButton" text="%LOAD_LABEL" />
-            <Button fx:id="resetInfectionsButton" mnemonicParsing="false" onAction="#handleInfectionsDefaultButton" text="%RESET_TO_DEFAULT_LABEL">
+            <Button fx:id="saveInfectionsButton" mnemonicParsing="false" onAction="#handleSaveInfectionsButton" text="%save-dots.label" />
+            <SplitMenuButton fx:id="loadInfectionsButton" mnemonicParsing="false" onAction="#handleLoadInfectionsButton" text="%load-dots.label" />
+            <Button fx:id="resetInfectionsButton" mnemonicParsing="false" onAction="#handleInfectionsDefaultButton" text="%reset-to-default.label">
                <tooltip>
-                  <Tooltip text="%RESET_TO_DEFAULT_TIP" />
+                  <Tooltip text="%reset-to-default.tip" />
                </tooltip>
             </Button>
          </children>
@@ -34,8 +34,8 @@ http://www.spc.int/
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy>
          <columns>
-            <TableColumn fx:id="infectionNameColumn" prefWidth="75.0" text="%ID_LABEL" />
-            <TableColumn fx:id="infectionFileColumn" prefWidth="75.0" text="%FILE_PREFIX_LABEL" />
+            <TableColumn fx:id="infectionNameColumn" prefWidth="75.0" text="%id.label" />
+            <TableColumn fx:id="infectionFileColumn" prefWidth="75.0" text="%file-prefix.label" />
          </columns>
       </TableView>
    </children>

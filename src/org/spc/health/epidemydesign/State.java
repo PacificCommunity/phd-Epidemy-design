@@ -1,8 +1,8 @@
-/***********************************************************************
- *  Copyright - Secretariat of the Pacific Community                   *
- *  Droit de copie - Secrétariat Général de la Communauté du Pacifique *
- *  http://www.spc.int/                                                *
- ***********************************************************************/
+/*
+ Copyright - Pacific Community
+ Droit de copie - Communauté du Pacifique
+ http://www.spc.int/
+*/
 package org.spc.health.epidemydesign;
 
 import java.util.Objects;
@@ -27,8 +27,7 @@ public final class State implements Comparable<State> {
 
     @Override
     public boolean equals(Object obj) {
-        boolean result = (obj instanceof State) ? id.equals(((State) obj).id) : false;
-        return result;
+        return obj instanceof State state && id.equals(state.id);
     }
 
     @Override
